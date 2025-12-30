@@ -49,3 +49,38 @@ export const filenameAddUniqueSuffix = (filename) => {
 
 export const getFilename = (path) => path?.split("/")?.pop();
 
+export const camelCase = (str) =>
+  str
+    .toLowerCase()
+    .replace(/([-_][a-z])/g, (group) =>
+      group.toUpperCase().replace("-", "").replace("_", "")
+    );
+
+// Filtering
+export function filterByKeyExistence(
+  array,
+  key,
+  value,
+  booleans = [true, false]
+) {
+  if (!value) return array;
+  if (!booleans.find((bool) => value === bool)) return [];
+  return array.filter((el) => (value === booleans[0] ? el[key] : !el[key]));
+}
+
+//Sorting
+function lexicographicOrder(a, b) {
+  return a < b ? 1 : -1;
+}
+function numberOrder(a, b) {
+  return a - b;
+}
+export function sortByColumn(array, colName, order) {
+  const type = typeof array[0][colName] === "number" ? "number" : "string";
+  const modifier = order === "asc" ? 1 : -1;
+  return array.sort((a, b) => {
+    if (type === "number")
+      return modifier * numberOrder(a[colName], b[colName]);
+    else return modifier * lexicographicOrder(a[colName], b[colName]);
+  });
+}

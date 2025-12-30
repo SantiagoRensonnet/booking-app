@@ -1,5 +1,5 @@
-import { useSearchParams } from "react-router";
 import styled, { css } from "styled-components";
+import { useURLParams } from "../hooks/useUrlParams";
 
 const StyledFilter = styled.div`
   border: 1px solid var(--color-grey-100);
@@ -35,24 +35,20 @@ const FilterButton = styled.button`
   }
 `;
 
-export default function Filter({ filterKey, filterValues }) {
-  const [searchParams, setSearchParams] = useSearchParams();
-  function setUrlParam(name, value) {
-    const newParams = new URLSearchParams(searchParams);
-    value ? newParams.set(name, value) : newParams.delete(name);
-    setSearchParams(newParams);
-  }
+export default function Filter({ filterKey, options }) {
+  const { getURLParam, setURLParam } = useURLParams();
+
+  const currentFilterValue =
+    getURLParam(filterKey) ??
+    options.find((option) => option.value === "").value;
 
   return (
     <StyledFilter>
-      {filterValues.map(({ value, label }) => (
+      {options.map(({ value, label }) => (
         <FilterButton
-          active={
-            value
-              ? searchParams.get(filterKey) === value
-              : !searchParams.get(filterKey)
-          }
-          onClick={() => setUrlParam(filterKey, value)}
+          key={value || label.toLowerCase()}
+          active={currentFilterValue === value}
+          onClick={() => setURLParam(filterKey, value)}
         >
           {label}
         </FilterButton>
