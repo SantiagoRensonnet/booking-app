@@ -1,18 +1,9 @@
 import TableOperations from "../../ui/TableOperations";
-import FilterTabs from "../../ui/FilterTabs";
 import SortBy from "../../ui/SortBy";
 import { FilterWindow } from "../../ui/FilterWindow";
 export default function CabinTableOperations() {
   return (
     <TableOperations>
-      {/* <FilterTabs
-        filterKey="discount"
-        options={[
-          { value: "", label: "All" },
-          { value: "true", label: "With discount" },
-          { value: "false", label: "No discount" },
-        ]}
-      /> */}
       <SortBy
         options={[
           { value: "name.asc", label: "Sort by name (A-Z)" },
@@ -29,8 +20,8 @@ export default function CabinTableOperations() {
       <FilterWindow
         columns={[
           { name: "name", label: "Name", type: "string" },
-          { name: "regular_price", label: "Price", type: "number" },
-          { name: "max_capacity", label: "Capacity", type: "number" },
+          { name: "regular_price", label: "Price", type: "number", min: 0 },
+          { name: "max_capacity", label: "Capacity", type: "number", min: 0 },
           {
             name: "discount",
             label: "Discount",

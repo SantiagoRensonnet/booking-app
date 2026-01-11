@@ -60,12 +60,26 @@ export default function FilterRow({
               <NumberRangeInput
                 name={`filter_${filter.id}_value`}
                 separator="and"
+                min={filter.min}
+                max={filter.max}
               />
             ) : (
-              <Input name={`filter_${filter.id}_value`} type="number" />
+              <Input
+                name={`filter_${filter.id}_value`}
+                type="number"
+                required
+                min={filter.min}
+                max={filter.max}
+              />
             )
           ) : (
-            <Input name={`filter_${filter.id}_value`} type="text" />
+            <Input
+              name={`filter_${filter.id}_value`}
+              type="text"
+              required
+              min={filter.min}
+              max={filter.max}
+            />
           )}
         </>
       )}

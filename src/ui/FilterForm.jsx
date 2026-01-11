@@ -39,6 +39,8 @@ export default function FilterForm({ columns, defaultValue, closeModal }) {
       })),
       condition: defaultValue.condition,
       conditionOptions: getConditionOptions(defaultValue),
+      ...(defaultValue.min !== undefined && { min: defaultValue.min }),
+      ...(defaultValue.max !== undefined && { max: defaultValue.max }),
     },
   ]);
   function addFilter() {
@@ -51,6 +53,8 @@ export default function FilterForm({ columns, defaultValue, closeModal }) {
     const nextFilter = unused_columns[0];
     const newType = nextFilter.type;
     const newConditionOptions = getConditionOptions(nextFilter);
+    const min = nextFilter.min,
+      max = nextFilter.max;
     const newFilter = {
       id: filters.at(-1).id + 1,
       type: newType,
@@ -61,6 +65,8 @@ export default function FilterForm({ columns, defaultValue, closeModal }) {
       })),
       condition: newConditionOptions[0]?.value,
       conditionOptions: newConditionOptions,
+      ...(min !== undefined && { min }),
+      ...(max !== undefined && { max }),
     };
     setFilters([...filters, newFilter]);
   }
@@ -70,6 +76,8 @@ export default function FilterForm({ columns, defaultValue, closeModal }) {
   function handleCriteriaChange(id, newCriteria) {
     const newColumn = columns.find((column) => column.name === newCriteria);
     const newConditionOptions = getConditionOptions(newColumn);
+    const min = newColumn.min,
+      max = newColumn.max;
     const nextFilters = filters.map((filter) => {
       if (filter.id === id) {
         return {
@@ -78,6 +86,8 @@ export default function FilterForm({ columns, defaultValue, closeModal }) {
           criteria: newCriteria,
           condition: newConditionOptions[0]?.value,
           conditionOptions: newConditionOptions,
+          ...(min !== undefined && { min }),
+          ...(max !== undefined && { max }),
         };
       } else return filter;
     });
@@ -111,6 +121,8 @@ export default function FilterForm({ columns, defaultValue, closeModal }) {
             filter={filter}
             rowIndex={index}
             ref={index === filters.length - 1 ? lastFilterRef : null}
+            min={filter.min}
+            max={filter.max}
           />
         ))}
       </ListViewport>
