@@ -7,11 +7,10 @@ import CabinRow from "./CabinRow";
 import Table from "../../ui/Table";
 import MenusController from "../../ui/MenusController";
 import { useSearchParams } from "react-router";
-import {
-  camelCase,
-  filterByKeyExistence,
-  sortByColumn,
-} from "../../utils/helpers";
+import { camelCase } from "../../utils/helpers";
+import { filterByKeyExistence } from "../../utils/filter";
+import { sortByColumn } from "../../utils/sort";
+
 
 const TableHeader = styled.header`
   display: grid;
@@ -28,35 +27,7 @@ const TableHeader = styled.header`
   padding: 1.6rem 2.4rem;
 `;
 
-/**
- *
- * Returns an array of objects that have a certain not null field     -- filter value is truthy
- *
- * Returns an array of objects that lack a certain field (or is null) -- filter value is falsy
- *
- * ### Notes
- * If the filter value is null -> the original array will be returned
- *
- * If the filter value is not valid, not in `booleans` -> an empty array will be returned
- *
- *
- * @param {Object[]} array
- * array to be filtered
- *
- * @param {string} key
- * filter key
- *
- * @param {string} value
- * filter value
- *
- * @param {Boolean[]} booleans
- * list of valid filter values interpreted as truthy and falsy respectively
- *
- * @returns {Object[]}
- * Filtered array.
- *
- *
- */
+
 export default function CabinTable() {
   const [searchParams] = useSearchParams();
   const { isLoading, error, cabins } = useCabins();
@@ -67,7 +38,7 @@ export default function CabinTable() {
     cabins,
     "discount",
     searchParams.get("discount"),
-    ["with-discount", "no-discount"]
+    ["true", "false"]
   );
 
   const [colName, order] = searchParams.get("sort_by")

@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 const ButtonIcon = styled.button`
   background: none;
@@ -16,6 +16,13 @@ const ButtonIcon = styled.button`
     height: 2.2rem;
     color: var(--color-brand-600);
   }
+  ${(props) =>
+    props.$alignCenter &&
+    css`
+      display: flex;
+      align-items: center;
+      gap: 0.25em;
+    `}
 `;
 
 export default ButtonIcon;

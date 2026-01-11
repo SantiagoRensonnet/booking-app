@@ -59,9 +59,16 @@ const Button = styled.button`
   border-radius: var(--border-radius-sm);
   &:hover {
     background: var(--color-green-700);
-  }
-  ${(props) => sizes[props.size ?? "medium"]}
-  ${(props) => variations[props.variation ?? "primary"]}
+  } 
+  ${(props) => sizes[props.$size ?? "medium"]}
+  ${(props) => variations[props.$variation ?? "primary"]}
+  ${(props) =>
+    props.$alignCenter &&
+    css`
+      display: flex;
+      align-items: center;
+      gap: 0.25em;
+    `}
 `;
 
 export default Button;

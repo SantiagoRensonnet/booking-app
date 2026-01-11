@@ -35,7 +35,7 @@ const FilterButton = styled.button`
   }
 `;
 
-export default function Filter({ filterKey, options }) {
+export default function FilterTabs({ filterKey, options }) {
   const { getURLParam, setURLParam } = useURLParams();
 
   const currentFilterValue =

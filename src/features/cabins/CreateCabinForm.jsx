@@ -120,7 +120,7 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
         {/* type is an HTML attribute! */}
         <Button
           onClick={() => onCloseModal?.()}
-          variation="secondary"
+          $variation="secondary"
           type="reset"
         >
           Cancel

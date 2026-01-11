@@ -1,8 +1,35 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
+const borderOptions = {
+  bottom: css`
+    &:not(:last-child) {
+      border-bottom: 1px solid var(--color-grey-100);
+    }
+  `,
+  none: css`
+    border: none;
+  `,
+};
+const buttonAlignments = {
+  start: css`
+    &:has(button) {
+      display: flex;
+      justify-content: flex-start;
+      gap: 1.2rem;
+    }
+  `,
+  end: css`
+    &:has(button) {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1.2rem;
+    }
+  `,
+  none: null,
+};
 const StyledFormRow = styled.div`
   display: grid;
   align-items: center;
-  grid-template-columns: 24rem 1fr 1.2fr;
+  grid-template-columns: ${(props) => props.$columns ?? "24rem 1fr 1.2fr"};
   gap: 2.4rem;
 
   padding: 1.2rem 0;
@@ -14,16 +41,18 @@ const StyledFormRow = styled.div`
   &:last-child {
     padding-bottom: 0;
   }
-
-  &:not(:last-child) {
-    border-bottom: 1px solid var(--color-grey-100);
-  }
-
-  &:has(button) {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1.2rem;
-  }
+  ${(props) => borderOptions[props.$border ?? "bottom"]}
+  ${(props) => buttonAlignments[props.$buttonAlignment ?? "end"]}
+  ${(props) =>
+    props.$paddingBottom &&
+    css`
+      padding-bottom: ${props.$paddingBottom};
+    `}
+  ${(props) =>
+    props.$paddingTop &&
+    css`
+      padding-bottom: ${props.$paddingTop};
+    `}
 `;
 
 const Label = styled.label`
@@ -34,9 +63,9 @@ const Error = styled.span`
   font-size: 1.4rem;
   color: var(--color-red-700);
 `;
-export default function FormRow({ label, error, children }) {
+export default function FormRow({ label, error, children, ref, ...props }) {
   return (
-    <StyledFormRow>
+    <StyledFormRow ref={ref} {...props}>
       {label && <Label htmlFor={children?.props?.id}>{label}</Label>}
       {children}
       {error && <Error>{error}</Error>}

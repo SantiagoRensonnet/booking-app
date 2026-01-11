@@ -14,9 +14,16 @@ const StyledSelect = styled.select`
   box-shadow: var(--shadow-sm);
 `;
 
-export default function Select({ options, value, onChange, ...props }) {
+export default function Select({
+  name,
+  options,
+  value,
+  forceValue,
+  onChange,
+  ...props
+}) {
   return (
-    <StyledSelect defaultValue={value} onChange={onChange} {...props}>
+    <StyledSelect name={name} value={forceValue} defaultValue={value} onChange={onChange} {...props}>
       {options?.map((option) => (
         <option key={option.value} value={option.value}>
           {option.label}
