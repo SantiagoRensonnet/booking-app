@@ -5,6 +5,7 @@ function numberOrder(a, b) {
   return a - b;
 }
 export function sortByColumn(array, colName, order) {
+  if (!array?.length) return array;
   const type = typeof array[0][colName] === "number" ? "number" : "string";
   const modifier = order === "asc" ? 1 : -1;
   return array.sort((a, b) => {

@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
 import { HiOutlinePlusCircle } from "react-icons/hi2";
 
+import { useForm, FormProvider } from "react-hook-form";
+
 import ListViewport from "./ListViewport";
 import FilterRow from "./FilterRow";
 import Form from "./Form";
@@ -28,11 +30,32 @@ function getConditionOptions(column) {
 }
 
 export default function FilterForm({ columns, defaultValue, closeModal }) {
+  //form validation
+  const formRef = useRef();
+  const methods = useForm();
+  function onSubmit(data) {
+    const formData = new FormData(formRef.current);
+    console.log(formData);
+  }
+  function onError(error) {
+    console.log(error);
+  }
+  //validation should depend on react-hook-form form state (not filters)
+  function isCriteriaUnique(criteria) {
+    const values = methods.getValues();
+    const formData = new FormData(formRef.current);
+    console.log(formData);
+    console.log(values);
+    return false;
+  }
+
+  // ui -> it can be refactored with useReducer (finish first the logic)
   const [filters, setFilters] = useState([
     {
       id: 1,
       type: defaultValue.type,
       criteria: defaultValue.criteria,
+      label:defaultValue.label,
       criteriaOptions: columns.map((column) => ({
         label: column.label,
         value: column.name,
@@ -59,7 +82,8 @@ export default function FilterForm({ columns, defaultValue, closeModal }) {
       id: filters.at(-1).id + 1,
       type: newType,
       criteria: nextFilter.name,
-      criteriaOptions: unused_columns.map((column) => ({
+      label: nextFilter.label,
+      criteriaOptions: columns.map((column) => ({
         label: column.label,
         value: column.name,
       })),
@@ -83,6 +107,7 @@ export default function FilterForm({ columns, defaultValue, closeModal }) {
         return {
           ...filter,
           type: newColumn.type,
+          label: newColumn.label,
           criteria: newCriteria,
           condition: newConditionOptions[0]?.value,
           conditionOptions: newConditionOptions,
@@ -105,48 +130,56 @@ export default function FilterForm({ columns, defaultValue, closeModal }) {
     setFilters(nextFilters);
   }
   const lastFilterRef = useRef(null);
-  return (
-    <Form type="modal">
-      <ListViewport
-        childrenLength={filters.length}
-        childrenMax={3}
-        lastChildRef={lastFilterRef}
-      >
-        {filters.map((filter, index) => (
-          <FilterRow
-            onCriteriaChange={handleCriteriaChange}
-            onConditionChange={handleConditionChange}
-            handleDelete={() => deleteFilter(filter.id)}
-            key={filter.id}
-            filter={filter}
-            rowIndex={index}
-            ref={index === filters.length - 1 ? lastFilterRef : null}
-            min={filter.min}
-            max={filter.max}
-          />
-        ))}
-      </ListViewport>
 
-      <FormRow $paddingBottom="0" $border="none" $buttonAlignment="start">
-        <ButtonIcon
-          disabled={filters.length === columns.length}
-          onClick={addFilter}
-          type="button"
-          $alignCenter="true"
+  return (
+    <FormProvider {...methods}>
+      <Form
+        ref={formRef}
+        onSubmit={methods.handleSubmit(onSubmit, onError)}
+        type="modal"
+      >
+        <ListViewport
+          childrenLength={filters.length}
+          childrenMax={3}
+          lastChildRef={lastFilterRef}
         >
-          <HiOutlinePlusCircle /> Add filter
-        </ButtonIcon>
-      </FormRow>
-      <FormRow>
-        <Button
-          onClick={() => closeModal?.()}
-          $variation="secondary"
-          type="reset"
-        >
-          Cancel
-        </Button>
-        <Button>Apply filters</Button>
-      </FormRow>
-    </Form>
+          {filters.map((filter, index) => (
+            <FilterRow
+              onCriteriaChange={handleCriteriaChange}
+              onConditionChange={handleConditionChange}
+              handleDelete={() => deleteFilter(filter.id)}
+              isCriteriaUnique = {isCriteriaUnique}
+              key={filter.id}
+              filter={filter}
+              rowIndex={index}
+              ref={index === filters.length - 1 ? lastFilterRef : null}
+              min={filter.min}
+              max={filter.max}
+            />
+          ))}
+        </ListViewport>
+
+        <FormRow $paddingBottom="0" $border="none" $buttonAlignment="start">
+          <ButtonIcon
+            disabled={filters.length === columns.length}
+            onClick={addFilter}
+            type="button"
+            $alignCenter="true"
+          >
+            <HiOutlinePlusCircle /> Add filter
+          </ButtonIcon>
+        </FormRow>
+        <FormRow>
+          <Button
+            onClick={() => closeModal?.()}
+            $variation="secondary"
+            type="reset"
+          >
+            Cancel
+          </Button>
+          <Button>Apply filters</Button>
+        </FormRow>
+      </Form>
+    </FormProvider>
   );
 }

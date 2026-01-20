@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 const StyledTabs = styled.div`
   border: 1px solid var(--color-grey-100);
@@ -18,6 +18,11 @@ const StyledTabs = styled.div`
       }
     }
   }
+  ${(props) =>
+    props.$column &&
+    css`
+      grid-column: ${props.$column};
+    `}
 `;
 
 const StyledTab = styled.label`
@@ -38,9 +43,9 @@ const StyledTab = styled.label`
   }
 `;
 
-export default function FormTabs({ name, options }) {
+export default function FormTabs({ name, options, ...props }) {
   return (
-    <StyledTabs>
+    <StyledTabs {...props}>
       {options.map(({ value, label }, index) => (
         <div key={value || label.toLowerCase()}>
           <input

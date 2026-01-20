@@ -1,3 +1,5 @@
+import { useFormContext } from "react-hook-form";
+
 import { HiXMark } from "react-icons/hi2";
 
 import FormRow from "./FormRow";
@@ -13,6 +15,7 @@ export default function FilterRow({
   rowIndex,
   onCriteriaChange,
   onConditionChange,
+  isCriteriaUnique,
   ref,
 }) {
   function changeCriteria(e) {
@@ -23,14 +26,28 @@ export default function FilterRow({
     if (!e.target.value) return false;
     onConditionChange(filter.id, e.target.value);
   }
+  const {
+    register,
+    formState: { errors },
+    unregister,
+    watch,
+    trigger,
+  } = useFormContext();
+
+  const watchAllFields = watch();
+  console.log(watchAllFields);
+  
   return (
     <FormRow
       $buttonAlignment="none"
-      $columns={
-        filter.type === "boolean" ? "24rem 1fr 3em" : "24rem 14rem 1fr 3em"
-      }
+      $columns="14rem 14rem 22rem 3em 1fr"
       ref={ref}
       $border="none"
+      error={
+        errors[`filter_${filter.id}_value`]?.message ??
+        errors[`filter_${filter.id}_value_min`]?.message ??
+        errors[`filter_${filter.id}_value_max`]?.message
+      }
     >
       <Select
         name={`filter_${filter.id}_criteria`}
@@ -41,6 +58,7 @@ export default function FilterRow({
       {filter.type === "boolean" ? (
         <FormTabs
           name={`filter_${filter.id}_value`}
+          $column="2/4"
           options={[
             { value: "", label: "All" },
             { value: "true", label: "With discount" },
@@ -62,31 +80,64 @@ export default function FilterRow({
                 separator="and"
                 min={filter.min}
                 max={filter.max}
+                errorLabel={filter.criteria}
+                controlled={true}
+                validate={() =>
+                  isCriteriaUnique(filter.criteria) ||
+                  `${filter.label} is duplicated`
+                }
               />
             ) : (
               <Input
-                name={`filter_${filter.id}_value`}
+                {...register(`filter_${filter.id}_value`, {
+                  required: "This field is required",
+                  min: {
+                    value: filter.min,
+                    message: `${filter.criteria} should be at least ${filter.min}`,
+                  },
+                  max: {
+                    value: filter.max,
+                    message: `${filter.criteria} should be less than ${filter.max}`,
+                  },
+                  validate: () =>
+                    isCriteriaUnique(filter.criteria) ||
+                    `${filter.label} is duplicated`, 
+                })}
                 type="number"
-                required
-                min={filter.min}
-                max={filter.max}
+                aria-invalid={
+                  errors[`filter_${filter.id}_value`] ? "true" : "false"
+                }
               />
             )
           ) : (
             <Input
-              name={`filter_${filter.id}_value`}
+              {...register(`filter_${filter.id}_value`, {
+                required: "This field is required",
+                validate: () =>
+                  isCriteriaUnique(filter.criteria) ||
+                  `${filter.label} is duplicated`,
+              })}
               type="text"
-              required
-              min={filter.min}
-              max={filter.max}
+              aria-invalid={
+                errors[`filter_${filter.id}_value`] ? "true" : "false"
+              }
             />
           )}
         </>
       )}
-      {rowIndex > 0 && (
-        <ButtonIcon onClick={() => handleDelete(filter.id)} type="button">
+      {rowIndex > 0 ? (
+        <ButtonIcon
+          onClick={() => {
+            handleDelete(filter.id);
+            unregister(`filter_${filter.id}_value`);
+            trigger();
+          }}
+          type="button"
+        >
           <HiXMark />
         </ButtonIcon>
+      ) : (
+        <div></div>
       )}
     </FormRow>
   );

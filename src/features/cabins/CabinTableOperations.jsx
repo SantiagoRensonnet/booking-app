@@ -20,8 +20,8 @@ export default function CabinTableOperations() {
       <FilterWindow
         columns={[
           { name: "name", label: "Name", type: "string" },
-          { name: "regular_price", label: "Price", type: "number", min: 0 },
-          { name: "max_capacity", label: "Capacity", type: "number", min: 0 },
+          { name: "regular_price", label: "Price", type: "number", min: 1 },
+          { name: "max_capacity", label: "Capacity", type: "number", min: 1 },
           {
             name: "discount",
             label: "Discount",
@@ -36,6 +36,7 @@ export default function CabinTableOperations() {
         defaultValue={{
           type: "string",
           criteria: "name",
+          label:"Name",
           condition: "contains",
         }}
       />
