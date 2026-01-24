@@ -1,4 +1,5 @@
-import styled from "styled-components";
+import { useFormContext } from "react-hook-form";
+import styled, { css } from "styled-components";
 
 const StyledTabs = styled.div`
   border: 1px solid var(--color-grey-100);
@@ -18,9 +19,16 @@ const StyledTabs = styled.div`
       }
     }
   }
+  ${(props) =>
+    props.$column &&
+    css`
+      grid-column: ${props.$column};
+    `}
 `;
 
 const StyledTab = styled.label`
+  display: inline-block;
+
   background-color: var(--color-grey-0);
   border: none;
   cursor: pointer;
@@ -38,9 +46,38 @@ const StyledTab = styled.label`
   }
 `;
 
-export default function FormTabs({ name, options }) {
+export default function FormTabs({ controlled = false, ...props }) {
+  return controlled ? (
+    <ControlledFormTabs {...props} />
+  ) : (
+    <UncontrolledFormTabs {...props} />
+  );
+}
+
+function ControlledFormTabs({ name, options, controlled, ...props }) {
+  const { register } = useFormContext();
   return (
-    <StyledTabs>
+    <StyledTabs {...props}>
+      {options.map(({ value, label }, index) => (
+        <div key={value || label.toLowerCase()}>
+          <input
+            type="radio"
+            {...register(name)}
+            value={value}
+            id={`${name}_${value}`}
+            defaultChecked={index === 0}
+          />
+          <StyledTab htmlFor={`${name}_${value}`} type="button">
+            {label}
+          </StyledTab>
+        </div>
+      ))}
+    </StyledTabs>
+  );
+}
+function UncontrolledFormTabs({ name, options, controlled, ...props }) {
+  return (
+    <StyledTabs {...props}>
       {options.map(({ value, label }, index) => (
         <div key={value || label.toLowerCase()}>
           <input

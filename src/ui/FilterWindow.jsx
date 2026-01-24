@@ -6,7 +6,7 @@ import Modal from "./Modal";
 import FilterForm  from "./FilterForm";
 
 
-export function FilterWindow({ columns, defaultValue }) {
+export default function FilterWindow({ columns, defaultValue }) {
   return (
     <Modal>
       <Modal.Trigger

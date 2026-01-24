@@ -1,6 +1,6 @@
 import TableOperations from "../../ui/TableOperations";
 import SortBy from "../../ui/SortBy";
-import { FilterWindow } from "../../ui/FilterWindow";
+import  FilterWindow  from "../../ui/FilterWindow";
 export default function CabinTableOperations() {
   return (
     <TableOperations>
@@ -36,6 +36,7 @@ export default function CabinTableOperations() {
         defaultValue={{
           type: "string",
           criteria: "name",
+          label: "Name",
           condition: "contains",
         }}
       />
