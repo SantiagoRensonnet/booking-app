@@ -21,33 +21,40 @@ function ControlledNumberRangeInput({
   separator,
   name,
   filterLabel,
-  validate: externalValidate,
   min,
   max,
 }) {
   const {
     register,
     getValues,
+    clearErrors,
+    setError,
     formState: { errors },
-  } = useFormContext();  
+  } = useFormContext();
+  function isRangeValid(min, max) {
+    if (!min || !max) return;      
+    if (max > min) clearErrors(`${name}_range`);
+    else
+      setError(`${name}_range`, {
+        type: "custom",
+        message: "Max should be greater than min",
+      });
+  }
   return (
     <StyledNumberRangeInput>
       <Input
         $width="100%"
         type="number"
+        onInput={(e) =>
+          isRangeValid(Number(e.target.value), getValues(`${name}_max`))
+        }
         aria-invalid={errors[`${name}_min`] ? "true" : "false"}
         {...register(`${name}_min`, {
           required: "Min value is required",
           min: {
             value: min,
             message: `Minimum ${filterLabel.toLowerCase()} should be at least ${min}`,
-          },
-          validate: {
-            rangeValid: (min) =>
-              getValues(`${name}_max`) > min ||
-              "max should be greater than min",
-            ...externalValidate,
-          },
+          }
         })}
       />
       {separator && <span>{separator}</span>}
@@ -55,18 +62,15 @@ function ControlledNumberRangeInput({
         $width="100%"
         type="number"
         aria-invalid={errors[`${name}_max`] ? "true" : "false"}
+        onInput={(e) =>
+          isRangeValid(getValues(`${name}_min`), Number(e.target.value))
+        }
         {...register(`${name}_max`, {
           required: "Max value is required",
           max: {
             value: max,
             message: `Maximum ${filterLabel.toLowerCase()} should be less than ${max}`,
-          },
-          validate: {
-            rangeValid: (max) =>
-              max > getValues(`${name}_min`) ||
-              "max should be greater than min",
-            ...externalValidate,
-          },
+          }
         })}
       />
     </StyledNumberRangeInput>

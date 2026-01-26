@@ -35,10 +35,14 @@ function UncontrolledSelect({ name, options, value, onChange }) {
     </StyledSelect>
   );
 }
-function ControlledSelect({ name, options, value, onChange }) {
+function ControlledSelect({ name, options, value, onChange, validate }) {
   const { register } = useFormContext();
   return (
-    <StyledSelect {...register(name)} defaultValue={value} onChange={onChange}>
+    <StyledSelect
+      {...register(name, { validate })}
+      defaultValue={value}
+      onChange={onChange}
+    >
       {options?.map((option) => (
         <option key={option.value} value={option.value}>
           {option.label}

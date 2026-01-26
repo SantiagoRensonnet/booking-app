@@ -8,14 +8,13 @@ import Input from "./Input";
 import NumberRangeInput from "./NumberRangeInput";
 import Select from "./Select";
 import ButtonIcon from "./ButtonIcon";
+import { useEffect } from "react";
 
 export default function FilterRow({
   filter,
+  labelsLookup,
   rowIndex,
-  onDelete,
-  onCriteriaChange,
-  onConditionChange,
-  getConditionsByCriteria,
+  dispatch,
   ref,
 }) {
   const {
@@ -29,16 +28,21 @@ export default function FilterRow({
 
   function changeCriteria(e) {
     if (!e.target.value) return false;
-    onCriteriaChange(filter.id, e.target.value); //change filters (ui)
+
+    dispatch({
+      type: "criteria_changed",
+      id: filter.id,
+      newCriteria: e.target.value,
+    });
 
     //change validator values
     setValue(`filter_${filter.id}_criteria`, e.target.value);
-    setValue(
-      `filter_${filter.id}_condition`,
-      getConditionsByCriteria(e.target.value)[0].value,
-    );
+    // setValue(
+    //   `filter_${filter.id}_condition`,
+    //   getConditionsByCriteria(e.target.value)[0].value,
+    // );
 
-    //clean input values
+    // //clean input values
     unregister(`filter_${filter.id}_value_min`);
     unregister(`filter_${filter.id}_value_max`);
     unregister(`filter_${filter.id}_value`);
@@ -47,10 +51,14 @@ export default function FilterRow({
   }
   function changeCondition(e) {
     if (!e.target.value) return false;
-    onConditionChange(filter.id, e.target.value);
+    dispatch({
+      type: "condition_changed",
+      id: filter.id,
+      newCondition: e.target.value,
+    });
     const condition = getValues(`filter_${filter.id}_condition`);
 
-    //clean input values
+    // //clean input values
     if (condition === "range") {
       setValue(`filter_${filter.id}_value_min`, "");
       setValue(`filter_${filter.id}_value_max`, "");
@@ -60,13 +68,19 @@ export default function FilterRow({
     trigger();
   }
 
-  function isCriteriaUnique() {
+  function validateCriteria() {
     const values = getValues();
+    const current_criteria = getValues(`filter_${filter.id}_criteria`);
+
     const count = Object.keys(values)
       .filter((key) => key.includes("criteria"))
       .map((criteria) => values[criteria])
       .reduce((acc, curr) => ({ ...acc, [curr]: (acc[curr] || 0) + 1 }), {});
-    return count[filter.criteria] === 1;
+
+    return (
+      count[current_criteria] === 1 ||
+      `${labelsLookup[current_criteria]} is duplicated`
+    );
   }
 
   function unregisterAll() {
@@ -77,6 +91,10 @@ export default function FilterRow({
     unregister(`filter_${filter.id}_value`);
   }
 
+  useEffect(() => {
+    setValue(`filter_${filter.id}_condition`, filter.condition);
+  }, [filter.id, filter.condition, setValue]);
+
   return (
     <FormRow
       $buttonAlignment="none"
@@ -84,7 +102,9 @@ export default function FilterRow({
       ref={ref}
       $border="none"
       error={
+        errors[`filter_${filter.id}_criteria`]?.message ??
         errors[`filter_${filter.id}_value`]?.message ??
+        errors[`filter_${filter.id}_value_range`]?.message ??
         errors[`filter_${filter.id}_value_min`]?.message ??
         errors[`filter_${filter.id}_value_max`]?.message
       }
@@ -95,6 +115,7 @@ export default function FilterRow({
         onChange={changeCriteria}
         value={filter.criteria}
         controlled={true}
+        validate={validateCriteria}
       ></Select>
       {filter.type === "boolean" ? (
         <FormTabs
@@ -109,6 +130,7 @@ export default function FilterRow({
             name={`filter_${filter.id}_condition`}
             options={filter.conditionOptions}
             onChange={changeCondition}
+            value={filter.condition}
             controlled={true}
           ></Select>
           {filter.type === "number" ? (
@@ -120,10 +142,6 @@ export default function FilterRow({
                 max={filter.max}
                 filterLabel={filter.label}
                 controlled={true}
-                validate={() => ({
-                  uniqueCriteria:
-                    isCriteriaUnique() || `${filter.label} is duplicated`,
-                })}
               />
             ) : (
               <Input
@@ -137,8 +155,6 @@ export default function FilterRow({
                     value: filter.max,
                     message: `${filter.label} should be less than ${filter.max}`,
                   },
-                  validate: () =>
-                    isCriteriaUnique() || `${filter.label} is duplicated`,
                 })}
                 type="number"
                 aria-invalid={
@@ -150,8 +166,6 @@ export default function FilterRow({
             <Input
               {...register(`filter_${filter.id}_value`, {
                 required: "This field is required",
-                validate: () =>
-                  isCriteriaUnique() || `${filter.label} is duplicated`,
               })}
               type="text"
               aria-invalid={
@@ -164,7 +178,10 @@ export default function FilterRow({
       {rowIndex > 0 ? (
         <ButtonIcon
           onClick={() => {
-            onDelete(filter.id);
+            dispatch({
+              type: "deleted_filter",
+              id: filter.id,
+            });
             unregisterAll();
             trigger();
           }}
