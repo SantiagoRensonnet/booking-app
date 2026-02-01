@@ -15,6 +15,7 @@ export default function FilterWindow({ columns, initialFilters }) {
           <Button
             $variation="secondary"
             $alignCenter="true"
+            $number={initialFilters.length}
             onClick={openModal}
           >
             <HiMiniAdjustmentsHorizontal /> Filter

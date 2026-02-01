@@ -59,7 +59,7 @@ const Button = styled.button`
   border-radius: var(--border-radius-sm);
   &:hover {
     background: var(--color-green-700);
-  } 
+  }
   ${(props) => sizes[props.$size ?? "medium"]}
   ${(props) => variations[props.$variation ?? "primary"]}
   ${(props) =>
@@ -68,6 +68,30 @@ const Button = styled.button`
       display: flex;
       align-items: center;
       gap: 0.25em;
+    `}
+  ${(props) =>
+    props.$number &&
+    css`
+      border-color: var(--color-grey-700);
+      border-width: 1.5px;
+      position: relative;
+      &:before {
+        content: "${props.$number}";
+        position: absolute;
+        top: -0.75rem;
+        right: -0.75rem;
+        font-size:1rem;
+        font-weight:bold;
+        width:3ch;
+        aspect-ratio:1/1;
+        background-color: var(--color-grey-700);
+        border:2px solid var(--color-grey-0);
+        color: var(--color-grey-0);
+        border-radius:50%;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+      }
     `}
 `;
 
