@@ -1,15 +1,19 @@
+import { useSearchParams } from "react-router";
 import styled from "styled-components";
 
 import { useCabins } from "./useCabins";
+import { useURLParams } from "../../hooks/useURLParams";
 
 import Spinner from "../../ui/Spinner";
 import CabinRow from "./CabinRow";
 import Table from "../../ui/Table";
 import MenusController from "../../ui/MenusController";
-import { useSearchParams } from "react-router";
+
+
 import { camelCase } from "../../utils/helpers";
-import { filterByKeyExistence } from "../../utils/filter";
+import { filterByCriteriaArray } from "../../utils/filter";
 import { sortByColumn } from "../../utils/sort";
+import { decodeFiltersToParams } from "../../utils/filter";
 
 
 const TableHeader = styled.header`
@@ -31,15 +35,13 @@ const TableHeader = styled.header`
 export default function CabinTable() {
   const [searchParams] = useSearchParams();
   const { isLoading, error, cabins } = useCabins();
+  const {getURLParamAll} = useURLParams();
 
+  const currentFilters = decodeFiltersToParams(getURLParamAll("filter"));
+  
   if (isLoading) return <Spinner />;
-
-  const filteredCabins = filterByKeyExistence(
-    cabins,
-    "discount",
-    searchParams.get("discount"),
-    ["true", "false"]
-  );
+  
+  const filteredCabins = filterByCriteriaArray(cabins,currentFilters);
 
   const [colName, order] = searchParams.get("sort_by")
     ? camelCase(searchParams.get("sort_by")).split(".")

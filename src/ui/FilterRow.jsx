@@ -37,17 +37,13 @@ export default function FilterRow({
 
     //change validator values
     setValue(`filter_${filter.id}_criteria`, e.target.value);
-    // setValue(
-    //   `filter_${filter.id}_condition`,
-    //   getConditionsByCriteria(e.target.value)[0].value,
-    // );
 
     // //clean input values
     unregister(`filter_${filter.id}_value_min`);
     unregister(`filter_${filter.id}_value_max`);
     unregister(`filter_${filter.id}_value`);
 
-    trigger();
+    if (Object.keys(errors).length) trigger();
   }
   function changeCondition(e) {
     if (!e.target.value) return false;
@@ -60,12 +56,12 @@ export default function FilterRow({
 
     // //clean input values
     if (condition === "range") {
-      setValue(`filter_${filter.id}_value_min`, "");
-      setValue(`filter_${filter.id}_value_max`, "");
+      setValue(`filter_${filter.id}_value_min`, null);
+      setValue(`filter_${filter.id}_value_max`, null);
     } else if (e.target.value === "range")
-      setValue(`filter_${filter.id}_value`);
+      setValue(`filter_${filter.id}_value`, null);
 
-    trigger();
+    if (Object.keys(errors).length) trigger();
   }
 
   function validateCriteria() {
@@ -123,6 +119,7 @@ export default function FilterRow({
           $column="2/4"
           options={filter.conditionOptions}
           controlled={true}
+          defaultValue={filter.defaultValue}
         />
       ) : (
         <>
@@ -142,6 +139,8 @@ export default function FilterRow({
                 max={filter.max}
                 filterLabel={filter.label}
                 controlled={true}
+                defaultMin={filter.defaultValueMin}
+                defaultMax={filter.defaultValueMax}
               />
             ) : (
               <Input
@@ -160,6 +159,7 @@ export default function FilterRow({
                 aria-invalid={
                   errors[`filter_${filter.id}_value`] ? "true" : "false"
                 }
+                defaultValue={filter.defaultValue}
               />
             )
           ) : (
@@ -171,6 +171,7 @@ export default function FilterRow({
               aria-invalid={
                 errors[`filter_${filter.id}_value`] ? "true" : "false"
               }
+              defaultValue={filter.defaultValue}
             />
           )}
         </>
@@ -183,7 +184,7 @@ export default function FilterRow({
               id: filter.id,
             });
             unregisterAll();
-            trigger();
+            if (Object.keys(errors).length) trigger();
           }}
           type="button"
         >

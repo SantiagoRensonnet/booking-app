@@ -41,6 +41,13 @@ const StyledFormRow = styled.div`
   &:last-child {
     padding-bottom: 0;
   }
+
+  .group {
+    > *:not(:last-child) {
+      margin-right: 1.2rem;
+    }
+  }
+
   ${(props) => borderOptions[props.$border ?? "bottom"]}
   ${(props) => buttonAlignments[props.$buttonAlignment ?? "end"]}
   ${(props) =>
@@ -53,6 +60,10 @@ const StyledFormRow = styled.div`
     css`
       padding-bottom: ${props.$paddingTop};
     `}
+
+  &:has(.group) {
+    justify-content: space-between;
+  }
 `;
 
 const Label = styled.label`

@@ -6,7 +6,7 @@ import Modal from "./Modal";
 import FilterForm  from "./FilterForm";
 
 
-export default function FilterWindow({ columns, defaultValue }) {
+export default function FilterWindow({ columns, initialFilters }) {
   return (
     <Modal>
       <Modal.Trigger
@@ -26,7 +26,7 @@ export default function FilterWindow({ columns, defaultValue }) {
         render={(closeModal) => (
           <FilterForm
             columns={columns}
-            defaultValue={defaultValue}
+            initialFilters={initialFilters}
             closeModal={closeModal}
           />
         )}

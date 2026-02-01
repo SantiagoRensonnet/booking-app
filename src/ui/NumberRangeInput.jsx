@@ -23,6 +23,8 @@ function ControlledNumberRangeInput({
   filterLabel,
   min,
   max,
+  defaultMin,
+  defaultMax,
 }) {
   const {
     register,
@@ -32,7 +34,7 @@ function ControlledNumberRangeInput({
     formState: { errors },
   } = useFormContext();
   function isRangeValid(min, max) {
-    if (!min || !max) return;      
+    if (!min || !max) return;
     if (max > min) clearErrors(`${name}_range`);
     else
       setError(`${name}_range`, {
@@ -54,8 +56,9 @@ function ControlledNumberRangeInput({
           min: {
             value: min,
             message: `Minimum ${filterLabel.toLowerCase()} should be at least ${min}`,
-          }
+          },
         })}
+        defaultValue={defaultMin}
       />
       {separator && <span>{separator}</span>}
       <Input
@@ -70,18 +73,38 @@ function ControlledNumberRangeInput({
           max: {
             value: max,
             message: `Maximum ${filterLabel.toLowerCase()} should be less than ${max}`,
-          }
+          },
         })}
+        defaultValue={defaultMax}
       />
     </StyledNumberRangeInput>
   );
 }
-function UncontrolledNumberRangeInput({ separator, name, min, max }) {
+function UncontrolledNumberRangeInput({
+  separator,
+  name,
+  min,
+  max,
+  defaultMin,
+  defaultMax,
+}) {
   return (
     <StyledNumberRangeInput>
-      <Input name={`${name}_min`} $width="100%" type="number" min={min} />
+      <Input
+        name={`${name}_min`}
+        $width="100%"
+        type="number"
+        min={min}
+        defaultValue={defaultMin}
+      />
       {separator && <span>{separator}</span>}
-      <Input name={`${name}_max`} $width="100%" type="number" max={max} />
+      <Input
+        name={`${name}_max`}
+        $width="100%"
+        type="number"
+        max={max}
+        defaultValue={defaultMax}
+      />
     </StyledNumberRangeInput>
   );
 }

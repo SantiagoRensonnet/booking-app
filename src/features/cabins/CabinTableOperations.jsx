@@ -1,7 +1,12 @@
 import TableOperations from "../../ui/TableOperations";
 import SortBy from "../../ui/SortBy";
-import  FilterWindow  from "../../ui/FilterWindow";
+import FilterWindow from "../../ui/FilterWindow";
+import { useURLParams } from "../../hooks/useURLParams";
+
+import { decodeFiltersToParams } from "../../utils/filter";
 export default function CabinTableOperations() {
+  const { getURLParamAll } = useURLParams();
+  const filters = decodeFiltersToParams(getURLParamAll("filter"));
   return (
     <TableOperations>
       <SortBy
@@ -33,12 +38,7 @@ export default function CabinTableOperations() {
             ],
           },
         ]}
-        defaultValue={{
-          type: "string",
-          criteria: "name",
-          label: "Name",
-          condition: "contains",
-        }}
+        initialFilters={filters}
       />
     </TableOperations>
   );

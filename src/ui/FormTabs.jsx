@@ -54,8 +54,14 @@ export default function FormTabs({ controlled = false, ...props }) {
   );
 }
 
-function ControlledFormTabs({ name, options, controlled, ...props }) {
-  const { register } = useFormContext();
+function ControlledFormTabs({
+  name,
+  options,
+  controlled,
+  defaultValue,
+  ...props
+}) {
+  const { register } = useFormContext();  
   return (
     <StyledTabs {...props}>
       {options.map(({ value, label }, index) => (
@@ -65,7 +71,7 @@ function ControlledFormTabs({ name, options, controlled, ...props }) {
             {...register(name)}
             value={value}
             id={`${name}_${value}`}
-            defaultChecked={index === 0}
+            defaultChecked={defaultValue ? value === defaultValue : index === 0}
           />
           <StyledTab htmlFor={`${name}_${value}`} type="button">
             {label}
