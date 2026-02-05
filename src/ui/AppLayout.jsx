@@ -8,7 +8,6 @@ const Main = styled.main`
   background-color: var(--color-grey-50);
   padding: 4rem 4.8rem 6.4rem;
   grid-column: 2/-1;
-  overflow-y:auto;
 `;
 
 const StyledAppLayout = styled.div`

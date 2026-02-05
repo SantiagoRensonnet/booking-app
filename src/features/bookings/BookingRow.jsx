@@ -34,6 +34,7 @@ const Amount = styled.div`
   font-weight: 500;
 `;
 
+
 function BookingRow({
   booking: {
     id: bookingId,
@@ -56,7 +57,13 @@ function BookingRow({
 
   return (
     <Table.Row>
-      <Cabin>{cabinName}</Cabin>
+      <Table.TrimmedCell
+        rowId={bookingId}
+        maxWidth="7rem"
+        trimmingEnable={cabinName.length > 4}
+      >
+        <Cabin>{cabinName}</Cabin>
+      </Table.TrimmedCell>
 
       <Stacked>
         <span>{guestName}</span>

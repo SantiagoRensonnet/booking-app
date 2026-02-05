@@ -1,5 +1,5 @@
-import { createContext, useContext } from "react";
-import styled from "styled-components";
+import { createContext, useContext, useState } from "react";
+import styled, { css } from "styled-components";
 
 const StyledTable = styled.div`
   border: 1px solid var(--color-grey-200);
@@ -38,6 +38,29 @@ const StyledBody = styled.section`
   margin: 0.4rem 0;
 `;
 
+const StyledTrimmedCell = styled.label`
+  input[type="checkbox"] {
+    display: none;
+  }
+  > * {
+    cursor: zoom-in;
+    word-break: break-word;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 5rem;
+    ${(props) => props.$maxWidth && `max-width:${props.$maxWidth}`}
+  }
+  ${(props) =>
+    props.$expand &&
+    css`
+      > * {
+        white-space: unset;
+        cursor: zoom-out;
+      }
+    `}
+`;
+
 const Footer = styled.footer`
   background-color: var(--color-grey-50);
   display: flex;
@@ -59,8 +82,9 @@ const Empty = styled.p`
 const TableContext = createContext();
 
 function Table({ columns, children }) {
+  const [expandedRows, setExpandedRows] = useState({});
   return (
-    <TableContext value={{ columns }}>
+    <TableContext value={{ columns, expandedRows, setExpandedRows }}>
       <StyledTable role="table">{children}</StyledTable>
     </TableContext>
   );
@@ -75,7 +99,7 @@ function Header({ children }) {
 }
 
 function Body({ data, render }) {
-  if(!data?.length) return <Empty>No data</Empty>
+  if (!data?.length) return <Empty>No data</Empty>;
   return <StyledBody>{data.map((el) => render(el))}</StyledBody>;
 }
 function Row({ children }) {
@@ -87,9 +111,32 @@ function Row({ children }) {
   );
 }
 
+function TrimmedCell({ rowId, trimmingEnable, maxWidth, children }) {
+  const { expandedRows, setExpandedRows } = useContext(TableContext);
+  function handleChange() {
+    setExpandedRows((state) => ({
+      ...state,
+      [rowId]: state[rowId] ? false : true,
+    }));
+  }
+  return trimmingEnable ? (
+    <StyledTrimmedCell
+      $expand={expandedRows[rowId]}
+      $maxWidth={maxWidth}
+      onChange={handleChange}
+    >
+      <input type="checkbox" />
+      {children}
+    </StyledTrimmedCell>
+  ) : (
+    <>{children}</>
+  );
+}
+
 Table.Header = Header;
 Table.Body = Body;
 Table.Row = Row;
 Table.Footer = Footer;
+Table.TrimmedCell = TrimmedCell;
 
 export default Table;

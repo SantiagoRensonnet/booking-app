@@ -4,16 +4,16 @@ import styled from "styled-components";
 import { useCabins } from "./useCabins";
 import { useURLParams } from "../../hooks/useURLParams";
 
-import Spinner from "../../ui/Spinner";
 import CabinRow from "./CabinRow";
+import Spinner from "../../ui/Spinner";
+import Empty from "../../ui/Empty";
 import Table from "../../ui/Table";
 import MenusController from "../../ui/MenusController";
 
 
 import { camelCase } from "../../utils/helpers";
-import { filterByCriteriaArray } from "../../utils/filter";
 import { sortByColumn } from "../../utils/sort";
-import { decodeFiltersToParams } from "../../utils/filter";
+import { decodeFiltersToParams, filterByCriteriaArray } from "../../utils/filter";
 
 
 const TableHeader = styled.header`
@@ -41,6 +41,8 @@ export default function CabinTable() {
   
   if (isLoading) return <Spinner />;
   
+  if(!cabins.length) return <Empty resourceName="cabins" />
+
   const filteredCabins = filterByCriteriaArray(cabins,currentFilters);
 
   const [colName, order] = searchParams.get("sort_by")
