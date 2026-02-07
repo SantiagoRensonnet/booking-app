@@ -1,3 +1,5 @@
+import { useFormContext } from "react-hook-form";
+
 import styled from "styled-components";
 
 const StyledSelect = styled.select`
@@ -14,9 +16,33 @@ const StyledSelect = styled.select`
   box-shadow: var(--shadow-sm);
 `;
 
-export default function Select({ options, value, onChange, ...props }) {
+export default function Select({ controlled = false, ...props }) {
+  return controlled ? (
+    <ControlledSelect {...props} />
+  ) : (
+    <UncontrolledSelect {...props} />
+  );
+}
+
+function UncontrolledSelect({ name, options, value, onChange }) {
   return (
-    <StyledSelect defaultValue={value} onChange={onChange} {...props}>
+    <StyledSelect name={name} defaultValue={value} onChange={onChange}>
+      {options?.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </StyledSelect>
+  );
+}
+function ControlledSelect({ name, options, value, onChange, validate }) {
+  const { register } = useFormContext();
+  return (
+    <StyledSelect
+      {...register(name, { validate })}
+      defaultValue={value}
+      onChange={onChange}
+    >
       {options?.map((option) => (
         <option key={option.value} value={option.value}>
           {option.label}

@@ -1,5 +1,5 @@
 import styled, { css } from "styled-components";
-import { useURLParams } from "../hooks/useUrlParams";
+import { useURLParams } from "../hooks/useURLParams";
 
 const StyledFilter = styled.div`
   border: 1px solid var(--color-grey-100);
@@ -35,7 +35,7 @@ const FilterButton = styled.button`
   }
 `;
 
-export default function Filter({ filterKey, options }) {
+export default function FilterTabs({ filterKey, options }) {
   const { getURLParam, setURLParam } = useURLParams();
 
   const currentFilterValue =

@@ -38,10 +38,6 @@ const Discount = styled.div`
   color: var(--color-green-700);
 `;
 
-const ButtonArray = styled.div`
-  display: flex;
-  gap: 0.5rem;
-`;
 
 export default function CabinRow({ cabin }) {
   const { isDeleting, deleteCabin } = useDeleteCabin();

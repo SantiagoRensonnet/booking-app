@@ -1,17 +1,14 @@
 import TableOperations from "../../ui/TableOperations";
-import Filter from "../../ui/Filter";
 import SortBy from "../../ui/SortBy";
+import FilterWindow from "../../ui/FilterWindow";
+import { useURLParams } from "../../hooks/useURLParams";
+
+import { decodeFiltersToParams } from "../../utils/filter";
 export default function CabinTableOperations() {
+  const { getURLParamAll } = useURLParams();
+  const filters = decodeFiltersToParams(getURLParamAll("filter"));
   return (
     <TableOperations>
-      <Filter
-        filterKey="discount"
-        options={[
-          { value: "", label: "All" },
-          { value: "with-discount", label: "With discount" },
-          { value: "no-discount", label: "No discount" },
-        ]}
-      />
       <SortBy
         options={[
           { value: "name.asc", label: "Sort by name (A-Z)" },
@@ -19,8 +16,29 @@ export default function CabinTableOperations() {
           { value: "regular_price.asc", label: "Sort by price (low first)" },
           { value: "regular_price.desc", label: "Sort by price (high first)" },
           { value: "max_capacity.asc", label: "Sort by capacity (low first)" },
-          { value: "max_capacity.desc", label: "Sort by capacity (high first)" },
+          {
+            value: "max_capacity.desc",
+            label: "Sort by capacity (high first)",
+          },
         ]}
+      />
+      <FilterWindow
+        columns={[
+          { name: "name", label: "Name", type: "string" },
+          { name: "regular_price", label: "Price", type: "number", min: 0 },
+          { name: "max_capacity", label: "Capacity", type: "number", min: 0 },
+          {
+            name: "discount",
+            label: "Discount",
+            type: "boolean",
+            values: [
+              { value: "", label: "All" },
+              { value: "true", label: "With discount" },
+              { value: "false", label: "No discount" },
+            ],
+          },
+        ]}
+        initialFilters={filters}
       />
     </TableOperations>
   );

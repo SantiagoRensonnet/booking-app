@@ -188,7 +188,7 @@ export const guests = [
   },
   {
     fullName: 'Emma Brown',
-    email: 'emma@gmail.com',
+    email: 'emmabrown@gmail.com',
     nationality: 'Canada',
     nationalID: '8901234567',
     countryFlag: 'https://flagcdn.com/ca.svg',
