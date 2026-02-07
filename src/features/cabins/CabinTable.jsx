@@ -13,7 +13,7 @@ import MenusController from "../../ui/MenusController";
 
 import { camelCase } from "../../utils/helpers";
 import { sortByColumn } from "../../utils/sort";
-import { decodeFiltersToParams, filterByCriteriaArray } from "../../utils/filter";
+import { decodeFiltersToParams, applyFilters } from "../../utils/filter";
 
 
 const TableHeader = styled.header`
@@ -43,7 +43,7 @@ export default function CabinTable() {
   
   if(!cabins.length) return <Empty resourceName="cabins" />
 
-  const filteredCabins = filterByCriteriaArray(cabins,currentFilters);
+  const filteredCabins = applyFilters(cabins,currentFilters);
 
   const [colName, order] = searchParams.get("sort_by")
     ? camelCase(searchParams.get("sort_by")).split(".")

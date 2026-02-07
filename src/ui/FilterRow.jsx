@@ -180,7 +180,7 @@ export default function FilterRow({
         <ButtonIcon
           onClick={() => {
             dispatch({
-              type: "deleted_filter",
+              type: "filter_deleted",
               id: filter.id,
             });
             unregisterAll();

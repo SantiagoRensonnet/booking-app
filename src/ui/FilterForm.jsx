@@ -69,7 +69,7 @@ export default function FilterForm({
             onClick={() => {
               const values = methods.getValues();
               dispatch({
-                type: "added_filter",
+                type: "filter_added",
                 usedCriteriaArray: Object.keys(values)
                   .filter((key) => key.includes("criteria"))
                   .map((key) => values[key]),

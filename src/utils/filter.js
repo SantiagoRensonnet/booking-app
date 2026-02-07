@@ -94,7 +94,7 @@ export function createInitialState({ filters, columns }) {
 
 export function reducer(state, action) {
   switch (action.type) {
-    case "added_filter": {
+    case "filter_added": {
       const unused_columns = state.columns.filter(
         (column) => !action.usedCriteriaArray.includes(column.name),
       );
@@ -124,7 +124,7 @@ export function reducer(state, action) {
         ],
       };
     }
-    case "deleted_filter": {
+    case "filter_deleted": {
       return {
         ...state,
         filters: state.filters.filter((filter) => filter.id !== action.id),
@@ -323,15 +323,20 @@ export function filterByKeyExistence(
   return array.filter((el) => (value === booleans[0] ? el[key] : !el[key]));
 }
 
-function filterElementByCriteria(element, filter) {
-  const element_value = element[camelCase(filter.criteria)];
+function filterElementByCriteria(element, filter, formatFilterCriteria) {
+  const criteria = formatFilterCriteria
+    ? formatFilterCriteria(filter.criteria)
+    : filter.criteria;
+  const element_value = element[criteria];
   switch (filter.condition) {
     case "contains":
       return element_value.includes(filter.value);
     case "equals":
       return (
         element_value ===
-        (element_value === "number" ? Number(filter.value) : filter.value)
+        (typeof element_value === "number"
+          ? Number(filter.value)
+          : filter.value)
       );
     case "greater":
       return element_value > Number(filter.value);
@@ -349,11 +354,11 @@ function filterElementByCriteria(element, filter) {
   }
 }
 
-export function filterByCriteriaArray(array, filters) {
+export function applyFilters(array, filters) {
   if (!filters || !array?.length) return array;
   return array.filter((item) =>
     filters.reduce((acc, curr) => {
-      return acc && filterElementByCriteria(item, curr);
+      return acc && filterElementByCriteria(item, curr, camelCase);
     }, true),
   );
 }

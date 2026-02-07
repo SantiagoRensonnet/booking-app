@@ -1,5 +1,5 @@
 function lexicographicOrder(a, b) {
-  return a < b ? 1 : -1;
+  return a > b ? 1 : -1;
 }
 function numberOrder(a, b) {
   return a - b;

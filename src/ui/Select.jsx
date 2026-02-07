@@ -18,9 +18,9 @@ const StyledSelect = styled.select`
 
 export default function Select({ controlled = false, ...props }) {
   return controlled ? (
-    <ControlledSelect key={1} {...props} />
+    <ControlledSelect {...props} />
   ) : (
-    <UncontrolledSelect key={2} {...props} />
+    <UncontrolledSelect {...props} />
   );
 }
 
