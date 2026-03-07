@@ -1,7 +1,10 @@
 import { filenameAddUniqueSuffix } from "../utils/helpers";
 import supabase, { supabaseUrl } from "./supabase";
-export async function getCabins() {
-  const { data, error } = await supabase.from("cabins").select("*");
+export async function getCabins({ column, direction = "asc" }) {
+  let query = supabase.from("cabins").select("*");
+  if (column) query.order(column, { ascending: direction === "asc" });
+
+  const { data, error } = await query;
   if (error) throw new Error("Cabins could not be loaded");
 
   return data;
@@ -11,10 +14,10 @@ export async function deleteCabin(id) {
   if (error) throw new Error(`Cabin could not be deleted, ${error.message}`);
 }
 
-export async function updateCabin(cabin, cabinId) {  
+export async function updateCabin(cabin, cabinId) {
   const hasUserUploadedImage = !(
     typeof cabin.image === "string" && cabin?.image?.startsWith(supabaseUrl)
-  );  
+  );
   const relativePath = hasUserUploadedImage
     ? filenameAddUniqueSuffix(cabin.image[0].name.replaceAll("/", "-"))
     : null;
@@ -23,7 +26,7 @@ export async function updateCabin(cabin, cabinId) {
     : cabin.image;
 
   // Upload or replace image
-  if (hasUserUploadedImage) {    
+  if (hasUserUploadedImage) {
     const { error: fileError } = await supabase.storage
       .from("cabin-images")
       .upload(relativePath, cabin.image[0]);
@@ -32,7 +35,7 @@ export async function updateCabin(cabin, cabinId) {
       throw new Error(
         `Cabin ${cabin?.name} could not be ${cabinId ? "updated" : "added"}, ${
           fileError.message
-        }`
+        }`,
       );
 
     if (cabinId) {
@@ -60,7 +63,7 @@ export async function updateCabin(cabin, cabinId) {
     throw new Error(
       `Cabin ${cabin.name} could not be ${cabinId ? "updated" : "added"}, ${
         cabinError.message
-      }`
+      }`,
     );
 
   if (cabinData) return cabinData;

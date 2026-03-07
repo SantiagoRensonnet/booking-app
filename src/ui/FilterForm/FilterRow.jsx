@@ -2,23 +2,25 @@ import { useFormContext } from "react-hook-form";
 
 import { HiXMark } from "react-icons/hi2";
 
-import FormRow from "./FormRow";
-import FormTabs from "./FormTabs";
-import Input from "./Input";
-import NumberRangeInput from "./NumberRangeInput";
-import Select from "./Select";
-import ButtonIcon from "./ButtonIcon";
+import FormRow from "../FormRow";
+import ButtonIcon from "../ButtonIcon";
+
 import { useEffect } from "react";
+import FilterCondition from "./FilterCondition";
+import FilterCriteria from "./FilterCriteria";
+import FilterValue from "./FilterValue";
 
 export default function FilterRow({
   filter,
+  layout,
+  typesLookup,
   labelsLookup,
+  valuesLookup,
   rowIndex,
   dispatch,
   ref,
 }) {
   const {
-    register,
     formState: { errors },
     unregister,
     setValue,
@@ -42,6 +44,17 @@ export default function FilterRow({
     unregister(`filter_${filter.id}_value_min`);
     unregister(`filter_${filter.id}_value_max`);
     unregister(`filter_${filter.id}_value`);
+
+    const values = valuesLookup[e.target.value];
+    const type = typesLookup[e.target.value];
+    const filterAllValue = values
+      ? type === "enum"
+        ? [values[0]?.value]
+        : values[0]?.value
+      : null;
+    if (filterAllValue) {
+      setValue(`filter_${filter.id}_value`, filterAllValue);
+    }
 
     if (Object.keys(errors).length) trigger();
   }
@@ -91,10 +104,20 @@ export default function FilterRow({
     setValue(`filter_${filter.id}_condition`, filter.condition);
   }, [filter.id, filter.condition, setValue]);
 
+  const baseName = `filter_${filter.id}`;
+  const filterNames = {
+    criteria: `${baseName}_criteria`,
+    condition: `${baseName}_condition`,
+    value: `${baseName}_value`,
+    valueMin: `${baseName}_value_min`,
+    valueMax: `${baseName}_value_max`,
+    valueRange: `${baseName}_value_range`,
+  };
+
   return (
     <FormRow
       $buttonAlignment="none"
-      $columns="14rem 14rem 22rem 3em 1fr"
+      $columns={layout?.columns ?? "14rem 14rem 22rem 3em 1fr"}
       ref={ref}
       $border="none"
       error={
@@ -105,77 +128,18 @@ export default function FilterRow({
         errors[`filter_${filter.id}_value_max`]?.message
       }
     >
-      <Select
-        name={`filter_${filter.id}_criteria`}
-        options={filter.criteriaOptions}
-        onChange={changeCriteria}
-        value={filter.criteria}
-        controlled={true}
-        validate={validateCriteria}
-      ></Select>
-      {filter.type === "boolean" ? (
-        <FormTabs
-          name={`filter_${filter.id}_value`}
-          $column="2/4"
-          options={filter.conditionOptions}
-          controlled={true}
-          defaultValue={filter.defaultValue}
-        />
-      ) : (
-        <>
-          <Select
-            name={`filter_${filter.id}_condition`}
-            options={filter.conditionOptions}
-            onChange={changeCondition}
-            value={filter.condition}
-            controlled={true}
-          ></Select>
-          {filter.type === "number" ? (
-            filter.condition === "range" ? (
-              <NumberRangeInput
-                name={`filter_${filter.id}_value`}
-                separator="and"
-                min={filter.min}
-                max={filter.max}
-                filterLabel={filter.label}
-                controlled={true}
-                defaultMin={filter.defaultValueMin}
-                defaultMax={filter.defaultValueMax}
-              />
-            ) : (
-              <Input
-                {...register(`filter_${filter.id}_value`, {
-                  required: "This field is required",
-                  min: {
-                    value: filter.min,
-                    message: `${filter.label} should be at least ${filter.min}`,
-                  },
-                  max: {
-                    value: filter.max,
-                    message: `${filter.label} should be less than ${filter.max}`,
-                  },
-                })}
-                type="number"
-                aria-invalid={
-                  errors[`filter_${filter.id}_value`] ? "true" : "false"
-                }
-                defaultValue={filter.defaultValue}
-              />
-            )
-          ) : (
-            <Input
-              {...register(`filter_${filter.id}_value`, {
-                required: "This field is required",
-              })}
-              type="text"
-              aria-invalid={
-                errors[`filter_${filter.id}_value`] ? "true" : "false"
-              }
-              defaultValue={filter.defaultValue}
-            />
-          )}
-        </>
-      )}
+      <FilterCriteria
+        filter={filter}
+        filterNames={filterNames}
+        changeCriteria={changeCriteria}
+        validateCriteria={validateCriteria}
+      />
+      <FilterCondition
+        filter={filter}
+        filterNames={filterNames}
+        changeCondition={changeCondition}
+      />
+      <FilterValue filter={filter} filterNames={filterNames} layout={layout} />
       {rowIndex > 0 ? (
         <ButtonIcon
           onClick={() => {

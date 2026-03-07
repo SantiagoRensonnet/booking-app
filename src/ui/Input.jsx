@@ -9,6 +9,11 @@ const Input = styled.input`
     css`
       width: ${props.$width};
     `}
+  ${(props) =>
+    props.$maxWidth &&
+    css`
+      max-width: ${props.$maxWidth};
+    `}
 `;
 
 export default Input;

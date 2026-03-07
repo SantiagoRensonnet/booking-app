@@ -16,7 +16,7 @@ const FilterButton = styled.button`
   border: none;
 
   ${(props) =>
-    props.active &&
+    props.$active &&
     css`
       background-color: var(--color-brand-600);
       color: var(--color-brand-50);
@@ -35,7 +35,7 @@ const FilterButton = styled.button`
   }
 `;
 
-export default function FilterTabs({ filterKey, options }) {
+export default function FilterTabs({ filterKey, options }) {  
   const { getURLParam, setURLParam } = useURLParams();
 
   const currentFilterValue =
@@ -47,7 +47,7 @@ export default function FilterTabs({ filterKey, options }) {
       {options.map(({ value, label }) => (
         <FilterButton
           key={value || label.toLowerCase()}
-          active={currentFilterValue === value}
+          $active={currentFilterValue === value}
           onClick={() => setURLParam(filterKey, value)}
         >
           {label}

@@ -1,12 +1,15 @@
+import { decodeParamsToFilters } from "../../utils/filters";
+import { columnsByEntity } from "../../utils/tables";
+
 import TableOperations from "../../ui/TableOperations";
 import SortBy from "../../ui/SortBy";
 import FilterWindow from "../../ui/FilterWindow";
+
 import { useURLParams } from "../../hooks/useURLParams";
 
-import { decodeFiltersToParams } from "../../utils/filter";
 export default function CabinTableOperations() {
   const { getURLParamAll } = useURLParams();
-  const filters = decodeFiltersToParams(getURLParamAll("filter"));
+  const filters = decodeParamsToFilters(getURLParamAll("filter"));
   return (
     <TableOperations>
       <SortBy
@@ -22,24 +25,7 @@ export default function CabinTableOperations() {
           },
         ]}
       />
-      <FilterWindow
-        columns={[
-          { name: "name", label: "Name", type: "string" },
-          { name: "regular_price", label: "Price", type: "number", min: 0 },
-          { name: "max_capacity", label: "Capacity", type: "number", min: 0 },
-          {
-            name: "discount",
-            label: "Discount",
-            type: "boolean",
-            values: [
-              { value: "", label: "All" },
-              { value: "true", label: "With discount" },
-              { value: "false", label: "No discount" },
-            ],
-          },
-        ]}
-        initialFilters={filters}
-      />
+      <FilterWindow columns={columnsByEntity.cabins} initialFilters={filters} />
     </TableOperations>
   );
 }

@@ -3,10 +3,10 @@ import { HiMiniAdjustmentsHorizontal } from "react-icons/hi2";
 
 import Button from "./Button";
 import Modal from "./Modal";
-import FilterForm  from "./FilterForm";
+import FilterForm  from "./FilterForm/FilterForm";
 
 
-export default function FilterWindow({ columns, initialFilters }) {
+export default function FilterWindow({ columns, initialFilters, layout }) {
   return (
     <Modal>
       <Modal.Trigger
@@ -27,6 +27,7 @@ export default function FilterWindow({ columns, initialFilters }) {
         render={(closeModal) => (
           <FilterForm
             columns={columns}
+            layout={layout}
             initialFilters={initialFilters}
             closeModal={closeModal}
           />
