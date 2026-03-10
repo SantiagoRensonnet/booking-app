@@ -1,4 +1,4 @@
-import { camelCase } from "./helpers";
+import { columnLookupTableByEntity } from "./tables";
 
 // Filter form utils
 export const getConditionOptionsByColumn = (column) => {
@@ -15,36 +15,35 @@ export const getConditionOptionsByColumn = (column) => {
         { label: "Greater than", value: "greater" },
         { label: "Between", value: "range" },
       ];
+    case "date":
+      return [
+        { label: "Equals to", value: "equals" },
+        { label: "Before", value: "less" },
+        { label: "After", value: "greater" },
+        { label: "Between", value: "range" },
+      ];
     case "boolean":
+      return column.values;
+    case "enum":
       return column.values;
     default:
       throw Error("Unknown type: " + column.type);
   }
 };
 
-export const getCriteriaOptionsByColumns = (columns) =>
+function getFilterCondition(type, conditions) {
+  return type === "boolean" || type === "enum" ? type : conditions[0].value;
+}
+
+const getCriteriaOptionsByColumns = (columns) =>
   columns.map((column) => ({
     label: column.label,
     value: column.name,
   }));
 
-function getColumnsLookupTables(columns) {
-  const lookupTables = {
-    labelsLookup: {},
-    typesLookup: {},
-    valuesLookup: {},
-  };
-  columns.forEach((column) => {
-    lookupTables.labelsLookup[column.name] = column.label;
-    lookupTables.typesLookup[column.name] = column.type;
-    lookupTables.valuesLookup[column.name] = column.values;
-  });
-  return lookupTables;
-}
 
-export function createInitialState({ filters, columns }) {
-  const { labelsLookup, typesLookup, valuesLookup } =
-    getColumnsLookupTables(columns);
+export function createInitialState({ entity, columns ,filters }) {
+  const { labelsLookup, typesLookup, valuesLookup, numConstrainsLookup } = columnLookupTableByEntity[entity];
   if (!filters.length) {
     const firstCol = columns[0];
     const conditionOptions = getConditionOptionsByColumn(firstCol);
@@ -57,8 +56,14 @@ export function createInitialState({ filters, columns }) {
           label: labelsLookup[firstCol.criteria],
           criteria: firstCol.name,
           criteriaOptions: getCriteriaOptionsByColumns(columns),
-          condition: conditionOptions[0].value,
+          condition: getFilterCondition(firstCol.type, conditionOptions),
           conditionOptions: conditionOptions,
+          columnFilterAllName:
+            firstCol.type === "boolean" || firstCol.type === "enum"
+              ? conditionOptions[0].value
+              : null,
+          min: firstCol.min ?? null,
+          max: firstCol.max ?? null,
         },
       ],
     };
@@ -66,6 +71,12 @@ export function createInitialState({ filters, columns }) {
   return {
     columns,
     filters: filters.map((filter, index) => {
+      const filterType = typesLookup[filter.criteria];
+      const conditionOptions = getConditionOptionsByColumn({
+        ...filter,
+        type: filterType,
+        values: valuesLookup[filter.criteria],
+      });
       return {
         id: index,
         type: typesLookup[filter.criteria],
@@ -73,20 +84,16 @@ export function createInitialState({ filters, columns }) {
         criteria: filter.criteria,
         criteriaOptions: getCriteriaOptionsByColumns(columns),
         condition: filter.condition,
-        conditionOptions: getConditionOptionsByColumn({
-          ...filter,
-          type: typesLookup[filter.criteria],
-          values: valuesLookup[filter.criteria],
-        }),
-        ...(filter.value !== undefined && { defaultValue: filter.value }),
-        ...(filter.value_min !== undefined && {
-          defaultValueMin: filter.value_min,
-        }),
-        ...(filter.value_max !== undefined && {
-          defaultValueMax: filter.value_max,
-        }),
-        ...(filter.min !== undefined && { min: filter.min }),
-        ...(filter.max !== undefined && { max: filter.max }),
+        conditionOptions: conditionOptions,
+        defaultValue: filter.value ?? null,
+        defaultValueMin: filter.value_min ?? null,
+        defaultValueMax: filter.value_max ?? null,
+        columnFilterAllName:
+          filterType === "boolean" || filterType === "enum"
+            ? conditionOptions[0].value
+            : null,
+        min: numConstrainsLookup[filter.criteria].min ?? null,
+        max: numConstrainsLookup[filter.criteria].max ?? null,
       };
     }),
   };
@@ -103,8 +110,8 @@ export function reducer(state, action) {
       const nextFilter = unused_columns[0];
       const newType = nextFilter.type;
       const newConditionOptions = getConditionOptionsByColumn(nextFilter);
-      const min = nextFilter.min,
-        max = nextFilter.max;
+      const min = nextFilter.min ?? null,
+        max = nextFilter.max ?? null;
       return {
         ...state,
         filters: [
@@ -115,11 +122,14 @@ export function reducer(state, action) {
             label: nextFilter.label,
             criteria: nextFilter.name,
             criteriaOptions: getCriteriaOptionsByColumns(state.columns),
-            condition:
-              newType === "boolean" ? "boolean" : newConditionOptions[0].value,
+            condition: getFilterCondition(newType, newConditionOptions),
             conditionOptions: newConditionOptions,
-            ...(min !== undefined && { min }),
-            ...(max !== undefined && { max }),
+            columnFilterAllName:
+              newType === "boolean" || newType === "enum"
+                ? newConditionOptions[0].value
+                : null,
+            min,
+            max,
           },
         ],
       };
@@ -135,8 +145,8 @@ export function reducer(state, action) {
         (column) => column.name === action.newCriteria,
       );
       const newConditionOptions = getConditionOptionsByColumn(newColumn);
-      const min = newColumn.min,
-        max = newColumn.max;
+      const min = newColumn.min ?? null,
+        max = newColumn.max ?? null;
       return {
         ...state,
         filters: state.filters.map((filter) => {
@@ -146,13 +156,17 @@ export function reducer(state, action) {
               type: newColumn.type,
               label: newColumn.label,
               criteria: newColumn.name,
-              condition:
-                newColumn.type === "boolean"
-                  ? "boolean"
-                  : newConditionOptions[0].value,
+              condition: getFilterCondition(
+                newColumn.type,
+                newConditionOptions,
+              ),
               conditionOptions: newConditionOptions,
-              ...(min !== undefined && { min }),
-              ...(max !== undefined && { max }),
+              columnFilterAllName:
+                newColumn.type === "boolean" || newColumn.type === "enum"
+                  ? newConditionOptions[0].value
+                  : null,
+              min,
+              max,
             };
           } else return filter;
         }),
@@ -176,7 +190,9 @@ export function reducer(state, action) {
 }
 
 // Filter url params utils
-export function encodeFiltersToParams(formValues) {
+export function encodeFiltersToParams(entity, formValues) {
+  const { valuesLookup } = columnLookupTableByEntity[entity];
+
   const params = new URLSearchParams();
 
   // Group fields by filter index
@@ -196,11 +212,19 @@ export function encodeFiltersToParams(formValues) {
   Object.values(filters).forEach((filter) => {
     const { criteria, condition, value, value_min, value_max } = filter;
     if (!criteria) return;
-
     // Boolean
-    if (condition === "boolean" && value) {
+    if (condition === "boolean" && value !== valuesLookup[criteria][0]?.value) {
       params.set(`filter.${criteria}`, value);
       return;
+    }
+    // Enum
+    if (
+      condition === "enum" &&
+      Array.isArray(value) &&
+      value.length > 0 &&
+      !value.includes(valuesLookup[criteria][0]?.value)
+    ) {
+      params.set(`filter.${criteria}.in`, value.join(","));
     }
 
     // Range
@@ -229,7 +253,7 @@ export function encodeFiltersToParams(formValues) {
   return params;
 }
 
-export function decodeFiltersToParams(searchParams) {
+export function decodeParamsToFilters(searchParams) {
   const filters = [];
 
   for (const [key, value] of searchParams.entries()) {
@@ -265,6 +289,15 @@ export function decodeFiltersToParams(searchParams) {
       continue;
     }
 
+    if (operator === "in") {
+      filters.push({
+        criteria,
+        condition: "enum",
+        value: value.split(","),
+      });
+      continue;
+    }
+
     const conditionMap = {
       eq: "equals",
       contains: "contains",
@@ -282,36 +315,6 @@ export function decodeFiltersToParams(searchParams) {
   return filters;
 }
 
-// Filter table utils
-/**
- *
- * Returns an array of objects that have a certain not null field     -- filter value is truthy
- *
- * Returns an array of objects that lack a certain field (or is null) -- filter value is falsy
- *
- * ### Notes
- * If the filter value is null -> the original array will be returned
- *
- * If the filter value is not valid, not in `booleans` -> an empty array will be returned
- *
- *
- * @param {Object[]} array
- * array to be filtered
- *
- * @param {string} key
- * filter key
- *
- * @param {string} value
- * filter value
- *
- * @param {Boolean[]} booleans
- * list of valid filter values interpreted as truthy and falsy respectively
- *
- * @returns {Object[]}
- * Filtered array.
- *
- *
- */
 export function filterByKeyExistence(
   array,
   key,
@@ -323,42 +326,71 @@ export function filterByKeyExistence(
   return array.filter((el) => (value === booleans[0] ? el[key] : !el[key]));
 }
 
-function filterElementByCriteria(element, filter, formatFilterCriteria) {
-  const criteria = formatFilterCriteria
-    ? formatFilterCriteria(filter.criteria)
-    : filter.criteria;
-  const element_value = element[criteria];
+function formatByFilterType(value, filter_type) {
+  if (!value) return null;
+
+  switch (filter_type) {
+    case "string":
+      return value;
+    case "number":
+      return Number(value);
+    case "date":
+      return Date.parse(value);
+    case "boolean":
+      return Boolean(value);
+    case "enum":
+      return value;
+    default:
+      throw Error("Unknown filter type: " + filter_type);
+  }
+}
+
+
+function filterRowByCriteria(
+  row,
+  filter,
+  columnTypeLookupTable,
+  formatFilterCriteria = (x) => x,
+) {
+  const filter_type = columnTypeLookupTable[filter.criteria];
+  const raw_row_value = filter.criteria.includes("__")
+    ? filter.criteria
+        .split("__")
+        .map((key) => formatFilterCriteria(key))
+        .reduce((acc, curr) => acc?.[curr], row)
+    : row[formatFilterCriteria(filter.criteria)];
+    
+  const row_value = formatByFilterType(raw_row_value, filter_type);
+  const filter_value = formatByFilterType(filter.value, filter_type);
+  const filter_value_min = formatByFilterType(filter.value_min, filter_type);
+  const filter_value_max = formatByFilterType(filter.value_max, filter_type);  
+
   switch (filter.condition) {
     case "contains":
-      return element_value.includes(filter.value);
+      return row_value.includes(filter_value);
     case "equals":
-      return (
-        element_value ===
-        (typeof element_value === "number"
-          ? Number(filter.value)
-          : filter.value)
-      );
+      return row_value === filter_value;
     case "greater":
-      return element_value > Number(filter.value);
+      return row_value > filter_value;
     case "less":
-      return element_value < Number(filter.value);
+      return row_value < filter_value;
     case "range":
-      return (
-        element_value > Number(filter.value_min) &&
-        element_value < Number(filter.value_max)
-      );
+      return row_value > filter_value_min && row_value < filter_value_max;
     case "boolean":
-      return Boolean(element_value);
+      return row_value;
+    case "enum":
+      return filter_value.includes(row_value);
     default:
       throw Error("Unknown condition: " + filter.condition);
   }
 }
 
-export function applyFilters(array, filters) {
+export function applyFilters(entity, array, filters, filterToColumnMapFn) {
   if (!filters || !array?.length) return array;
-  return array.filter((item) =>
-    filters.reduce((acc, curr) => {
-      return acc && filterElementByCriteria(item, curr, camelCase);
-    }, true),
+  const entityLookupTable = columnLookupTableByEntity[entity]?.typesLookup;
+  return array.filter((row) =>
+    filters.every((filter) =>
+      filterRowByCriteria(row, filter, entityLookupTable, filterToColumnMapFn),
+    ),
   );
 }

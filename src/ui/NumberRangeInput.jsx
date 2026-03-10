@@ -9,6 +9,17 @@ const StyledNumberRangeInput = styled.div`
   align-items: center;
 `;
 
+function formatByType(val, type) {
+  switch (type) {
+    case "date":
+      return Date.parse(val);
+    case "number":
+      return Number(val);
+    default:
+      throw new Error("Unknown type: " + type);
+  }
+}
+
 export default function NumberRangeInput({ controlled = false, ...props }) {
   return controlled ? (
     <ControlledNumberRangeInput {...props} />
@@ -25,6 +36,8 @@ function ControlledNumberRangeInput({
   max,
   defaultMin,
   defaultMax,
+  type = "number",
+  maxWidth
 }) {
   const {
     register,
@@ -33,9 +46,10 @@ function ControlledNumberRangeInput({
     setError,
     formState: { errors },
   } = useFormContext();
-  function isRangeValid(min, max) {
+  function isRangeValid(min, max, type) {
     if (!min || !max) return;
-    if (max > min) clearErrors(`${name}_range`);
+    if (formatByType(max, type) > formatByType(min, type))
+      clearErrors(`${name}_range`);
     else
       setError(`${name}_range`, {
         type: "custom",
@@ -46,16 +60,20 @@ function ControlledNumberRangeInput({
     <StyledNumberRangeInput>
       <Input
         $width="100%"
-        type="number"
+        $maxWidth={maxWidth}
+        type={type}
         onInput={(e) =>
-          isRangeValid(Number(e.target.value), getValues(`${name}_max`))
+          isRangeValid(e.target.value, getValues(`${name}_max`), type)
         }
         aria-invalid={errors[`${name}_min`] ? "true" : "false"}
         {...register(`${name}_min`, {
           required: "Min value is required",
           min: {
             value: min,
-            message: `Minimum ${filterLabel.toLowerCase()} should be at least ${min}`,
+            message:
+              type === "date"
+                ? `Only dates before ${min} are accepted`
+                : `Minimum ${filterLabel.toLowerCase()} should be at least ${min}`,
           },
         })}
         defaultValue={defaultMin}
@@ -63,16 +81,18 @@ function ControlledNumberRangeInput({
       {separator && <span>{separator}</span>}
       <Input
         $width="100%"
-        type="number"
+        $maxWidth={maxWidth}
+        type={type}
         aria-invalid={errors[`${name}_max`] ? "true" : "false"}
-        onInput={(e) =>
-          isRangeValid(getValues(`${name}_min`), Number(e.target.value))
-        }
+        onInput={(e) => isRangeValid(getValues(`${name}_min`), e.target.value)}
         {...register(`${name}_max`, {
           required: "Max value is required",
           max: {
             value: max,
-            message: `Maximum ${filterLabel.toLowerCase()} should be less than ${max}`,
+            message:
+              type === "date"
+                ? `Only dates after ${max} are accepted`
+                : `Maximum ${filterLabel.toLowerCase()} should be less than ${max}`,
           },
         })}
         defaultValue={defaultMax}
@@ -87,13 +107,16 @@ function UncontrolledNumberRangeInput({
   max,
   defaultMin,
   defaultMax,
+  type = "number",
+  maxWidth
 }) {
   return (
     <StyledNumberRangeInput>
       <Input
         name={`${name}_min`}
         $width="100%"
-        type="number"
+        $maxWidth={maxWidth}
+        type={type}
         min={min}
         defaultValue={defaultMin}
       />
@@ -101,7 +124,8 @@ function UncontrolledNumberRangeInput({
       <Input
         name={`${name}_max`}
         $width="100%"
-        type="number"
+        $maxWidth={maxWidth}
+        type={type}
         max={max}
         defaultValue={defaultMax}
       />

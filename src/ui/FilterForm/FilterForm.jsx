@@ -2,41 +2,60 @@ import { useRef, useReducer } from "react";
 import { HiOutlinePlusCircle } from "react-icons/hi2";
 import { useForm, FormProvider } from "react-hook-form";
 
-import ListViewport from "./ListViewport";
+import ListViewport from "../ListViewport";
 import FilterRow from "./FilterRow";
-import Form from "./Form";
-import FormRow from "./FormRow";
-import ButtonIcon from "./ButtonIcon";
-import Button from "./Button";
+import Form from "../Form";
+import FormRow from "../FormRow";
+import ButtonIcon from "../ButtonIcon";
+import Button from "../Button";
 
 import {
   encodeFiltersToParams,
   createInitialState,
   reducer,
-} from "../utils/filter";
-import { useURLParams } from "../hooks/useURLParams";
+} from "../../utils/filters";
+import { useURLParams } from "../../hooks/useURLParams";
+
+function getDefaultValues(initialFilters, columns) {
+  const defaultValues = {};
+  if (initialFilters.length) {
+    initialFilters.forEach((filter, index) => {
+      const defaultValue = filter.value;
+      if (defaultValue) defaultValues[`filter_${index}_value`] = defaultValue;
+    });
+  } else {
+    const firstCol = columns[0];
+    if (firstCol.type === "boolean")
+      defaultValues[`filter_0_value`] = firstCol.values[0].value;
+    else if (firstCol.type === "enum")
+      defaultValues[`filter_0_value`] = [firstCol.values[0].value];
+  }
+  return defaultValues;
+}
 
 export default function FilterForm({
+  entityName,
   columns,
+  lookupTables,
   initialFilters = [],
+  layout,
   closeModal,
 }) {
-  const methods = useForm();
+  const methods = useForm({
+    defaultValues: getDefaultValues(initialFilters, columns),
+  });
+
   const { setURLParamAll, clearURLParamAll } = useURLParams();
   const lastFilterRef = useRef(null);
 
-  const { current: labelsLookup } = useRef(
-    columns.reduce((acc, curr) => ({ ...acc, [curr.name]: curr.label }), {}),
-  );
-
   const [state, dispatch] = useReducer(
     reducer,
-    { filters: initialFilters, columns },
+    { entityName, columns, filters: initialFilters },
     createInitialState,
   );
 
   function onSubmit(data) {
-    setURLParamAll("filter", encodeFiltersToParams(data));
+    setURLParamAll("filter", encodeFiltersToParams(entityName, data));
     closeModal?.();
   }
   function onError(error) {
@@ -54,8 +73,9 @@ export default function FilterForm({
           {state.filters.map((filter, index) => (
             <FilterRow
               key={filter.id}
+              layout={layout}
+              lookupTables={lookupTables}
               filter={filter}
-              labelsLookup={labelsLookup}
               rowIndex={index}
               dispatch={dispatch}
               ref={index === state.filters.length - 1 ? lastFilterRef : null}

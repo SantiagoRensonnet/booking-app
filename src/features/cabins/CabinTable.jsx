@@ -10,11 +10,9 @@ import Empty from "../../ui/Empty";
 import Table from "../../ui/Table";
 import MenusController from "../../ui/MenusController";
 
-
 import { camelCase } from "../../utils/helpers";
-import { sortByColumn } from "../../utils/sort";
-import { decodeFiltersToParams, applyFilters } from "../../utils/filter";
-
+import { decodeParamsToSort, sortByColumn } from "../../utils/sort";
+import { decodeParamsToFilters, applyFilters } from "../../utils/filters";
 
 const TableHeader = styled.header`
   display: grid;
@@ -31,25 +29,25 @@ const TableHeader = styled.header`
   padding: 1.6rem 2.4rem;
 `;
 
-
 export default function CabinTable() {
-  const [searchParams] = useSearchParams();
-  const { isLoading, error, cabins } = useCabins();
-  const {getURLParamAll} = useURLParams();
+  const { getURLParamAll, getURLParam } = useURLParams();
 
-  const currentFilters = decodeFiltersToParams(getURLParamAll("filter"));
+  const [colName, direction] = decodeParamsToSort(getURLParam("sort_by"), {
+    defaultOrder: "name.asc",
+    sortToColumnMapFn: camelCase,
+  });
+
+  const { isLoading, error, cabins } = useCabins({
+    defaultOrder: { column: colName, direction },
+  });
+
+  const currentFilters = decodeParamsToFilters(getURLParamAll("filter"));
   
   if (isLoading) return <Spinner />;
-  
-  if(!cabins.length) return <Empty resourceName="cabins" />
+  if (!cabins.length) return <Empty resourceName="cabins" />;
 
-  const filteredCabins = applyFilters(cabins,currentFilters);
-
-  const [colName, order] = searchParams.get("sort_by")
-    ? camelCase(searchParams.get("sort_by")).split(".")
-    : ["name", "asc"];
-
-  const sortedCabins = sortByColumn(filteredCabins, colName, order);
+  const filteredCabins = applyFilters("cabins", cabins, currentFilters, camelCase);
+  const sortedCabins = sortByColumn(filteredCabins, colName, direction);
 
   return (
     <MenusController>

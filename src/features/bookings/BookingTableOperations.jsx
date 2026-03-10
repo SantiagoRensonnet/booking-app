@@ -1,30 +1,37 @@
+import { columnsByEntity, columnLookupTableByEntity } from "../../utils/tables";
+import { decodeParamsToFilters } from "../../utils/filters";
+
 import SortBy from "../../ui/SortBy";
-import FilterTabs from "../../ui/FilterTabs";
 import TableOperations from "../../ui/TableOperations";
+import FilterWindow from "../../ui/FilterWindow";
+
+import { useURLParams } from "../../hooks/useURLParams";
 
 function BookingTableOperations() {
+  const { getURLParamAll } = useURLParams();
+  const filters = decodeParamsToFilters(getURLParamAll("filter"));
   return (
     <TableOperations>
-      <FilterTabs
-        filterField="status"
-        options={[
-          { value: "all", label: "All" },
-          { value: "checked-out", label: "Checked out" },
-          { value: "checked-in", label: "Checked in" },
-          { value: "unconfirmed", label: "Unconfirmed" },
-        ]}
-      />
-
       <SortBy
         options={[
-          { value: "startDate-desc", label: "Sort by date (recent first)" },
-          { value: "startDate-asc", label: "Sort by date (earlier first)" },
+          { value: "start_date.desc", label: "Sort by date (recent first)" },
+          { value: "start_date.asc", label: "Sort by date (earlier first)" },
           {
-            value: "totalPrice-desc",
+            value: "total_price.desc",
             label: "Sort by amount (high first)",
           },
-          { value: "totalPrice-asc", label: "Sort by amount (low first)" },
+          { value: "total_price.asc", label: "Sort by amount (low first)" },
         ]}
+      />
+      <FilterWindow
+        entityName="bookings"
+        columns={columnsByEntity.bookings}
+        lookupTables={columnLookupTableByEntity.bookings}
+        initialFilters={filters}
+        layout={{
+          columns: "14rem 14rem 1fr 3em",
+          maxWidth: { input: "14.2em" },
+        }}
       />
     </TableOperations>
   );
