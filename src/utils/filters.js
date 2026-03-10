@@ -35,34 +35,15 @@ function getFilterCondition(type, conditions) {
   return type === "boolean" || type === "enum" ? type : conditions[0].value;
 }
 
-export const getCriteriaOptionsByColumns = (columns) =>
+const getCriteriaOptionsByColumns = (columns) =>
   columns.map((column) => ({
     label: column.label,
     value: column.name,
   }));
 
-function getColumnsLookupTables(columns) {
-  const lookupTables = {
-    labelsLookup: {},
-    typesLookup: {},
-    valuesLookup: {},
-    numConstrainsLookup: {},
-  };
-  columns.forEach((column) => {
-    lookupTables.labelsLookup[column.name] = column.label ?? null;
-    lookupTables.typesLookup[column.name] = column.type ?? null;
-    lookupTables.valuesLookup[column.name] = column.values ?? null;
-    lookupTables.numConstrainsLookup[column.name] = {
-      min: column.min ?? null,
-      max: column.max ?? null,
-    };
-  });
-  return lookupTables;
-}
 
-export function createInitialState({ filters, columns }) {
-  const { labelsLookup, typesLookup, valuesLookup, numConstrainsLookup } =
-    getColumnsLookupTables(columns);
+export function createInitialState({ entity, columns ,filters }) {
+  const { labelsLookup, typesLookup, valuesLookup, numConstrainsLookup } = columnLookupTableByEntity[entity];
   if (!filters.length) {
     const firstCol = columns[0];
     const conditionOptions = getConditionOptionsByColumn(firstCol);
@@ -209,8 +190,8 @@ export function reducer(state, action) {
 }
 
 // Filter url params utils
-export function encodeFiltersToParams(formValues, columns) {
-  const { valuesLookup } = getColumnsLookupTables(columns);
+export function encodeFiltersToParams(entity, formValues) {
+  const { valuesLookup } = columnLookupTableByEntity[entity];
 
   const params = new URLSearchParams();
 
@@ -404,9 +385,9 @@ function filterRowByCriteria(
   }
 }
 
-export function applyFilters(entity_name, array, filters, filterToColumnMapFn) {
+export function applyFilters(entity, array, filters, filterToColumnMapFn) {
   if (!filters || !array?.length) return array;
-  const entityLookupTable = columnLookupTableByEntity[entity_name]?.typesLookup;
+  const entityLookupTable = columnLookupTableByEntity[entity]?.typesLookup;
   return array.filter((row) =>
     filters.every((filter) =>
       filterRowByCriteria(row, filter, entityLookupTable, filterToColumnMapFn),

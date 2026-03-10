@@ -27,6 +27,7 @@ export default function CabinTableOperations() {
         ]}
       />
       <FilterWindow
+        entityName="cabins"
         columns={columnsByEntity.cabins}
         lookupTables={columnLookupTableByEntity.cabins}
         initialFilters={filters}

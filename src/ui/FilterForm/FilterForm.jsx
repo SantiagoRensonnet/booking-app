@@ -34,6 +34,7 @@ function getDefaultValues(initialFilters, columns) {
 }
 
 export default function FilterForm({
+  entityName,
   columns,
   lookupTables,
   initialFilters = [],
@@ -44,17 +45,17 @@ export default function FilterForm({
     defaultValues: getDefaultValues(initialFilters, columns),
   });
 
-  const { setURLParamAll,clearURLParamAll } = useURLParams();
+  const { setURLParamAll, clearURLParamAll } = useURLParams();
   const lastFilterRef = useRef(null);
 
   const [state, dispatch] = useReducer(
     reducer,
-    { filters: initialFilters, columns },
+    { entityName, columns, filters: initialFilters },
     createInitialState,
   );
 
   function onSubmit(data) {
-    setURLParamAll("filter", encodeFiltersToParams(data, columns));
+    setURLParamAll("filter", encodeFiltersToParams(entityName, data));
     closeModal?.();
   }
   function onError(error) {

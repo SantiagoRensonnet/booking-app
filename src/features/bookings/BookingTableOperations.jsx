@@ -24,6 +24,7 @@ function BookingTableOperations() {
         ]}
       />
       <FilterWindow
+        entityName="bookings"
         columns={columnsByEntity.bookings}
         lookupTables={columnLookupTableByEntity.bookings}
         initialFilters={filters}

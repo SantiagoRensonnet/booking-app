@@ -5,6 +5,7 @@ import Modal from "./Modal";
 import FilterForm from "./FilterForm/FilterForm";
 
 export default function FilterWindow({
+  entityName,
   columns,
   lookupTables,
   initialFilters,
@@ -29,6 +30,7 @@ export default function FilterWindow({
         name="filter-window"
         render={(closeModal) => (
           <FilterForm
+            entityName={entityName}
             columns={columns}
             lookupTables={lookupTables}
             layout={layout}
