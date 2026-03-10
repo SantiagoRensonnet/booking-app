@@ -16,7 +16,7 @@ function BookingTable() {
   const currentFilters = decodeParamsToFilters(getURLParamAll("filter"));
     const [colName, direction] = decodeParamsToSort(getURLParam("sort_by"), {
     defaultOrder: "start_date.desc",
-    paramsMappingFn: camelCase,
+    sortToColumnMapFn: camelCase,
   });
 
   const { isLoading, error, bookings } = useBookings({
@@ -27,7 +27,7 @@ function BookingTable() {
 
   if (!bookings.length) return <Empty resourceName="bookings" />;  
 
-  const filteredBookings = applyFilters("bookings", bookings, currentFilters);
+  const filteredBookings = applyFilters("bookings", bookings, currentFilters, camelCase);
   const sortedBookings = sortByColumn(filteredBookings, colName, direction);
 
   return (

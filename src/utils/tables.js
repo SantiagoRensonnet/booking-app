@@ -1,4 +1,4 @@
-export const columnsByEntity = {
+const columnsByEntity = {
   cabins: [
     { name: "name", label: "Name", type: "string" },
     { name: "regular_price", label: "Price", type: "number", min: 0 },
@@ -55,11 +55,43 @@ export const columnsByEntity = {
 };
 
 const createColumnTypeLookupTable = (columns) =>
-  columns.reduce((acc, curr) => ({ ...acc, [curr.name]: curr.type }), {});
+  columns.reduce(
+    (acc, curr) => ({ ...acc, [curr.name]: curr.type ?? null }),
+    {},
+  );
+const createColumnLabelsLookupTable = (columns) =>
+  columns.reduce(
+    (acc, curr) => ({ ...acc, [curr.name]: curr.label ?? null }),
+    {},
+  );
+const createColumnValuesLookupTable = (columns) =>
+  columns.reduce(
+    (acc, curr) => ({ ...acc, [curr.name]: curr.values ?? null }),
+    {},
+  );
+const createColumnNumConstraintsLookupTable = (columns) =>
+  columns.reduce(
+    (acc, curr) => ({
+      ...acc,
+      [curr.name]: {
+        min: curr.min ?? null,
+        max: curr.max ?? null,
+      },
+    }),
+    {},
+  );
 
-export const columnTypeLookupTableByEntity = Object.entries(
-  columnsByEntity,
-).reduce(
-  (acc, curr) => ({ ...acc, [curr[0]]: createColumnTypeLookupTable(curr[1]) }),
+const columnLookupTableByEntity = Object.entries(columnsByEntity).reduce(
+  (acc, curr) => ({
+    ...acc,
+    [curr[0]]: {
+      typesLookup: createColumnTypeLookupTable(curr[1]),
+      labelsLookup: createColumnLabelsLookupTable(curr[1]),
+      valuesLookup: createColumnValuesLookupTable(curr[1]),
+      numConstraintsLookup: createColumnNumConstraintsLookupTable(curr[1]),
+    },
+  }),
   {},
 );
+
+export { columnsByEntity, columnLookupTableByEntity };

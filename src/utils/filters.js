@@ -1,5 +1,4 @@
-import { camelCase } from "./helpers";
-import { columnTypeLookupTableByEntity } from "./tables";
+import { columnLookupTableByEntity } from "./tables";
 
 // Filter form utils
 export const getConditionOptionsByColumn = (column) => {
@@ -335,36 +334,6 @@ export function decodeParamsToFilters(searchParams) {
   return filters;
 }
 
-// Filter table utils
-/**
- *
- * Returns an array of objects that have a certain not null field     -- filter value is truthy
- *
- * Returns an array of objects that lack a certain field (or is null) -- filter value is falsy
- *
- * ### Notes
- * If the filter value is null -> the original array will be returned
- *
- * If the filter value is not valid, not in `booleans` -> an empty array will be returned
- *
- *
- * @param {Object[]} array
- * array to be filtered
- *
- * @param {string} key
- * filter key
- *
- * @param {string} value
- * filter value
- *
- * @param {Boolean[]} booleans
- * list of valid filter values interpreted as truthy and falsy respectively
- *
- * @returns {Object[]}
- * Filtered array.
- *
- *
- */
 export function filterByKeyExistence(
   array,
   key,
@@ -409,8 +378,6 @@ function filterRowByCriteria(
         .map((key) => formatFilterCriteria(key))
         .reduce((acc, curr) => acc?.[curr], row)
     : row[formatFilterCriteria(filter.criteria)];
-
-    console.log(raw_row_value, filter_type);
     
   const row_value = formatByFilterType(raw_row_value, filter_type);
   const filter_value = formatByFilterType(filter.value, filter_type);
@@ -437,12 +404,12 @@ function filterRowByCriteria(
   }
 }
 
-export function applyFilters(entity_name, array, filters) {
+export function applyFilters(entity_name, array, filters, filterToColumnMapFn) {
   if (!filters || !array?.length) return array;
-  const entityLookupTable = columnTypeLookupTableByEntity[entity_name];
+  const entityLookupTable = columnLookupTableByEntity[entity_name]?.typesLookup;
   return array.filter((row) =>
     filters.every((filter) =>
-      filterRowByCriteria(row, filter, entityLookupTable, camelCase),
+      filterRowByCriteria(row, filter, entityLookupTable, filterToColumnMapFn),
     ),
   );
 }

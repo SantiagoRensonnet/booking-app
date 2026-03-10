@@ -1,13 +1,13 @@
 import Select from "../Select";
 export default function FilterCriteria({
   filter,
-  filterNames,
+  filterName,
   changeCriteria,
   validateCriteria,
 }) {
   return (
     <Select
-      name={filterNames.criteria}
+      name={filterName}
       options={filter.criteriaOptions}
       onChange={changeCriteria}
       value={filter.criteria}

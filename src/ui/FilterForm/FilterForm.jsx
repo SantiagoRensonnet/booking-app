@@ -35,6 +35,7 @@ function getDefaultValues(initialFilters, columns) {
 
 export default function FilterForm({
   columns,
+  lookupTables,
   initialFilters = [],
   layout,
   closeModal,
@@ -45,18 +46,6 @@ export default function FilterForm({
 
   const { setURLParamAll,clearURLParamAll } = useURLParams();
   const lastFilterRef = useRef(null);
-
-  const { current: labelsLookup } = useRef(
-    columns.reduce((acc, curr) => ({ ...acc, [curr.name]: curr.label }), {}),
-  );
-  const { current: valuesLookup } = useRef(
-    columns
-      .reduce((acc, curr) => ({ ...acc, [curr.name]: curr.values }), {}),
-  );
-  const { current: typesLookup } = useRef(
-    columns
-      .reduce((acc, curr) => ({ ...acc, [curr.name]: curr.type }), {}),
-  );
 
   const [state, dispatch] = useReducer(
     reducer,
@@ -84,10 +73,8 @@ export default function FilterForm({
             <FilterRow
               key={filter.id}
               layout={layout}
+              lookupTables={lookupTables}
               filter={filter}
-              typesLookup={typesLookup}
-              labelsLookup={labelsLookup}
-              valuesLookup={valuesLookup}
               rowIndex={index}
               dispatch={dispatch}
               ref={index === state.filters.length - 1 ? lastFilterRef : null}

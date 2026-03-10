@@ -30,12 +30,11 @@ const TableHeader = styled.header`
 `;
 
 export default function CabinTable() {
-  const [searchParams] = useSearchParams();
   const { getURLParamAll, getURLParam } = useURLParams();
 
   const [colName, direction] = decodeParamsToSort(getURLParam("sort_by"), {
     defaultOrder: "name.asc",
-    paramsMappingFn: camelCase,
+    sortToColumnMapFn: camelCase,
   });
 
   const { isLoading, error, cabins } = useCabins({
@@ -47,7 +46,7 @@ export default function CabinTable() {
   if (isLoading) return <Spinner />;
   if (!cabins.length) return <Empty resourceName="cabins" />;
 
-  const filteredCabins = applyFilters("cabins", cabins, currentFilters);
+  const filteredCabins = applyFilters("cabins", cabins, currentFilters, camelCase);
   const sortedCabins = sortByColumn(filteredCabins, colName, direction);
 
   return (

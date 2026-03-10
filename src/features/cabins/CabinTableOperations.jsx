@@ -1,5 +1,6 @@
 import { decodeParamsToFilters } from "../../utils/filters";
-import { columnsByEntity } from "../../utils/tables";
+import { columnLookupTableByEntity, columnsByEntity } from "../../utils/tables";
+
 
 import TableOperations from "../../ui/TableOperations";
 import SortBy from "../../ui/SortBy";
@@ -9,7 +10,7 @@ import { useURLParams } from "../../hooks/useURLParams";
 
 export default function CabinTableOperations() {
   const { getURLParamAll } = useURLParams();
-  const filters = decodeParamsToFilters(getURLParamAll("filter"));
+  const filters = decodeParamsToFilters(getURLParamAll("filter"));  
   return (
     <TableOperations>
       <SortBy
@@ -25,7 +26,11 @@ export default function CabinTableOperations() {
           },
         ]}
       />
-      <FilterWindow columns={columnsByEntity.cabins} initialFilters={filters} />
+      <FilterWindow
+        columns={columnsByEntity.cabins}
+        lookupTables={columnLookupTableByEntity.cabins}
+        initialFilters={filters}
+      />
     </TableOperations>
   );
 }

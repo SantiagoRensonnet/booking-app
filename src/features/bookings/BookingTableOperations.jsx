@@ -1,4 +1,4 @@
-import { columnsByEntity } from "../../utils/tables";
+import { columnsByEntity, columnLookupTableByEntity } from "../../utils/tables";
 import { decodeParamsToFilters } from "../../utils/filters";
 
 import SortBy from "../../ui/SortBy";
@@ -25,6 +25,7 @@ function BookingTableOperations() {
       />
       <FilterWindow
         columns={columnsByEntity.bookings}
+        lookupTables={columnLookupTableByEntity.bookings}
         initialFilters={filters}
         layout={{
           columns: "14rem 14rem 1fr 3em",

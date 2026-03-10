@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { HiXMark } from "react-icons/hi2";
@@ -5,17 +6,14 @@ import { HiXMark } from "react-icons/hi2";
 import FormRow from "../FormRow";
 import ButtonIcon from "../ButtonIcon";
 
-import { useEffect } from "react";
 import FilterCondition from "./FilterCondition";
 import FilterCriteria from "./FilterCriteria";
 import FilterValue from "./FilterValue";
 
 export default function FilterRow({
   filter,
+  lookupTables,
   layout,
-  typesLookup,
-  labelsLookup,
-  valuesLookup,
   rowIndex,
   dispatch,
   ref,
@@ -28,6 +26,18 @@ export default function FilterRow({
     trigger,
   } = useFormContext();
 
+  const { typesLookup, labelsLookup, valuesLookup } = lookupTables;
+
+  const baseName = `filter_${filter.id}`;
+  const filterNames = {
+    criteria: `${baseName}_criteria`,
+    condition: `${baseName}_condition`,
+    value: `${baseName}_value`,
+    valueMin: `${baseName}_value_min`,
+    valueMax: `${baseName}_value_max`,
+    valueRange: `${baseName}_value_range`,
+  };
+
   function changeCriteria(e) {
     if (!e.target.value) return false;
 
@@ -38,12 +48,12 @@ export default function FilterRow({
     });
 
     //change validator values
-    setValue(`filter_${filter.id}_criteria`, e.target.value);
+    setValue(filterNames.criteria, e.target.value);
 
     // //clean input values
-    unregister(`filter_${filter.id}_value_min`);
-    unregister(`filter_${filter.id}_value_max`);
-    unregister(`filter_${filter.id}_value`);
+    unregister(filterNames.valueMin);
+    unregister(filterNames.valueMax);
+    unregister(filterNames.value);
 
     const values = valuesLookup[e.target.value];
     const type = typesLookup[e.target.value];
@@ -53,7 +63,7 @@ export default function FilterRow({
         : values[0]?.value
       : null;
     if (filterAllValue) {
-      setValue(`filter_${filter.id}_value`, filterAllValue);
+      setValue(filterNames.value, filterAllValue);
     }
 
     if (Object.keys(errors).length) trigger();
@@ -65,21 +75,20 @@ export default function FilterRow({
       id: filter.id,
       newCondition: e.target.value,
     });
-    const condition = getValues(`filter_${filter.id}_condition`);
+    const condition = getValues(filterNames.condition);
 
     // //clean input values
     if (condition === "range") {
-      setValue(`filter_${filter.id}_value_min`, null);
-      setValue(`filter_${filter.id}_value_max`, null);
-    } else if (e.target.value === "range")
-      setValue(`filter_${filter.id}_value`, null);
+      setValue(filterNames.valueMin, null);
+      setValue(filterNames.valueMax, null);
+    } else if (e.target.value === "range") setValue(filterNames.value, null);
 
     if (Object.keys(errors).length) trigger();
   }
 
   function validateCriteria() {
     const values = getValues();
-    const current_criteria = getValues(`filter_${filter.id}_criteria`);
+    const current_criteria = getValues(filterNames.criteria);
 
     const count = Object.keys(values)
       .filter((key) => key.includes("criteria"))
@@ -93,26 +102,16 @@ export default function FilterRow({
   }
 
   function unregisterAll() {
-    unregister(`filter_${filter.id}_criteria`);
-    unregister(`filter_${filter.id}_condition`);
-    unregister(`filter_${filter.id}_value_min`);
-    unregister(`filter_${filter.id}_value_max`);
-    unregister(`filter_${filter.id}_value`);
+    unregister(filterNames.criteria);
+    unregister(filterNames.condition);
+    unregister(filterNames.valueMin);
+    unregister(filterNames.valueMax);
+    unregister(filterNames.value);
   }
 
   useEffect(() => {
     setValue(`filter_${filter.id}_condition`, filter.condition);
   }, [filter.id, filter.condition, setValue]);
-
-  const baseName = `filter_${filter.id}`;
-  const filterNames = {
-    criteria: `${baseName}_criteria`,
-    condition: `${baseName}_condition`,
-    value: `${baseName}_value`,
-    valueMin: `${baseName}_value_min`,
-    valueMax: `${baseName}_value_max`,
-    valueRange: `${baseName}_value_range`,
-  };
 
   return (
     <FormRow
@@ -121,25 +120,29 @@ export default function FilterRow({
       ref={ref}
       $border="none"
       error={
-        errors[`filter_${filter.id}_criteria`]?.message ??
-        errors[`filter_${filter.id}_value`]?.message ??
-        errors[`filter_${filter.id}_value_range`]?.message ??
-        errors[`filter_${filter.id}_value_min`]?.message ??
-        errors[`filter_${filter.id}_value_max`]?.message
+        errors[filterNames.criteria]?.message ??
+        errors[filterNames.value]?.message ??
+        errors[filterNames.valueRange]?.message ??
+        errors[filterNames.valueMin]?.message ??
+        errors[filterNames.valueMax]?.message
       }
     >
       <FilterCriteria
         filter={filter}
-        filterNames={filterNames}
+        filterName={filterNames.criteria}
         changeCriteria={changeCriteria}
         validateCriteria={validateCriteria}
       />
       <FilterCondition
         filter={filter}
-        filterNames={filterNames}
+        filterName={filterNames.condition}
         changeCondition={changeCondition}
       />
-      <FilterValue filter={filter} filterNames={filterNames} layout={layout} />
+      <FilterValue
+        filterName={filterNames.value}
+        filter={filter}
+        layout={layout}
+      />
       {rowIndex > 0 ? (
         <ButtonIcon
           onClick={() => {

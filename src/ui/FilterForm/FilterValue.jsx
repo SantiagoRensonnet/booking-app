@@ -3,7 +3,7 @@ import { useFormContext } from "react-hook-form";
 import NumberRangeInput from "../NumberRangeInput";
 import Input from "../Input";
 import FormTabs from "../FormTabs";
-export default function FilterValue({ filter, filterNames, layout }) {
+export default function FilterValue({ filter, filterName, layout }) {
   const {
     register,
     formState: { errors },
@@ -19,7 +19,7 @@ export default function FilterValue({ filter, filterNames, layout }) {
     return (
       <FormTabs
         $column="2/4"
-        name={filterNames.value}
+        name={filterName}
         criteria={filter.criteria}
         type={filter.type === "boolean" ? "radio" : "checkbox"}
         options={filter.conditionOptions}
@@ -31,7 +31,7 @@ export default function FilterValue({ filter, filterNames, layout }) {
   if (isRange) {
     return (
       <NumberRangeInput
-        name={filterNames.value}
+        name={filterName}
         separator="and"
         min={filter.min}
         max={filter.max}
@@ -48,7 +48,7 @@ export default function FilterValue({ filter, filterNames, layout }) {
   if (isDate)
     return (
       <Input
-        {...register(filterNames.value, {
+        {...register(filterName, {
           required: "This field is required",
           min: {
             value: filter.min,
@@ -61,7 +61,7 @@ export default function FilterValue({ filter, filterNames, layout }) {
         })}
         type="date"
         $maxWidth={layout?.maxWidth?.input}
-        aria-invalid={errors[filterNames.value] ? "true" : "false"}
+        aria-invalid={errors[filterName] ? "true" : "false"}
         defaultValue={filter.defaultValue}
       />
     );
@@ -69,7 +69,7 @@ export default function FilterValue({ filter, filterNames, layout }) {
   if (isNumber) {
     return (
       <Input
-        {...register(filterNames.value, {
+        {...register(filterName, {
           required: "This field is required",
           min: {
             value: filter.min,
@@ -82,7 +82,7 @@ export default function FilterValue({ filter, filterNames, layout }) {
         })}
         type="number"
         $maxWidth={layout?.maxWidth?.input}
-        aria-invalid={errors[filterNames.value] ? "true" : "false"}
+        aria-invalid={errors[filterName] ? "true" : "false"}
         defaultValue={filter.defaultValue}
       />
     );
@@ -90,12 +90,12 @@ export default function FilterValue({ filter, filterNames, layout }) {
 
   return (
     <Input
-      {...register(filterNames.value, {
+      {...register(filterName, {
         required: "This field is required",
       })}
       type="text"
       $maxWidth={layout?.maxWidth?.input}
-      aria-invalid={errors[filterNames.value] ? "true" : "false"}
+      aria-invalid={errors[filterName] ? "true" : "false"}
       defaultValue={filter.defaultValue}
     />
   );

@@ -1,5 +1,3 @@
-import { camelCase } from "./helpers";
-
 function lexicographicOrder(a, b) {
   return a > b ? 1 : -1;
 }
@@ -10,8 +8,8 @@ function dateOrder(a, b) {
   return Date.parse(a) > Date.parse(b) ? 1 : -1;
 }
 export function decodeParamsToSort(sortParam, opts = {}) {
-  const { defaultOrder = ".", paramsMappingFn = (arg) => arg } = opts;
-  return paramsMappingFn(sortParam ? sortParam : defaultOrder).split(".");
+  const { defaultOrder = ".", sortToColumnMapFn = (arg) => arg } = opts;
+  return sortToColumnMapFn(sortParam ? sortParam : defaultOrder).split(".");
 }
 function isValidDate(strDate) {
   return !isNaN(Date.parse(strDate));

@@ -1,9 +1,8 @@
-import FormTabs from "../FormTabs";
 import Select from "../Select";
 
 export default function FilterCondition({
   filter,
-  filterNames,
+  filterName,
   changeCondition,
 }) {
   const isBooleanOrEnum = filter.type === "boolean" || filter.type === "enum";
@@ -12,7 +11,7 @@ export default function FilterCondition({
 
   return (
     <Select
-      name={filterNames.condition}
+      name={filterName}
       options={filter.conditionOptions}
       onChange={changeCondition}
       value={filter.condition}
