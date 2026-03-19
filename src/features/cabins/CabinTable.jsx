@@ -46,7 +46,12 @@ export default function CabinTable() {
   if (isLoading) return <Spinner />;
   if (!cabins.length) return <Empty resourceName="cabins" />;
 
-  const filteredCabins = applyFilters("cabins", cabins, currentFilters, camelCase);
+  const filteredCabins = applyFilters(
+    "cabins",
+    cabins,
+    currentFilters,
+    camelCase,
+  );
   const sortedCabins = sortByColumn(filteredCabins, colName, direction);
 
   return (

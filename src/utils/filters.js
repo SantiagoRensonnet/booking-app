@@ -41,9 +41,10 @@ const getCriteriaOptionsByColumns = (columns) =>
     value: column.name,
   }));
 
+export function createInitialState({ entityName, columns, filters }) {
+  const { labelsLookup, typesLookup, valuesLookup, numConstraintsLookup } =
+    columnLookupTableByEntity[entityName];
 
-export function createInitialState({ entity, columns ,filters }) {
-  const { labelsLookup, typesLookup, valuesLookup, numConstrainsLookup } = columnLookupTableByEntity[entity];
   if (!filters.length) {
     const firstCol = columns[0];
     const conditionOptions = getConditionOptionsByColumn(firstCol);
@@ -92,8 +93,8 @@ export function createInitialState({ entity, columns ,filters }) {
           filterType === "boolean" || filterType === "enum"
             ? conditionOptions[0].value
             : null,
-        min: numConstrainsLookup[filter.criteria].min ?? null,
-        max: numConstrainsLookup[filter.criteria].max ?? null,
+        min: numConstraintsLookup[filter.criteria].min ?? null,
+        max: numConstraintsLookup[filter.criteria].max ?? null,
       };
     }),
   };
@@ -326,7 +327,7 @@ export function filterByKeyExistence(
   return array.filter((el) => (value === booleans[0] ? el[key] : !el[key]));
 }
 
-function formatByFilterType(value, filter_type) {
+function formatByFilterType(value, filter_type, booleanLookup) {
   if (!value) return null;
 
   switch (filter_type) {
@@ -337,7 +338,7 @@ function formatByFilterType(value, filter_type) {
     case "date":
       return Date.parse(value);
     case "boolean":
-      return Boolean(value);
+      return booleanLookup ? booleanLookup[value] : Boolean(value);
     case "enum":
       return value;
     default:
@@ -345,25 +346,26 @@ function formatByFilterType(value, filter_type) {
   }
 }
 
-
 function filterRowByCriteria(
   row,
   filter,
-  columnTypeLookupTable,
+  entityLookupTable,
   formatFilterCriteria = (x) => x,
 ) {
-  const filter_type = columnTypeLookupTable[filter.criteria];
+  const { booleanValuesLookup, typesLookup } = entityLookupTable;
+  const filter_type = typesLookup[filter.criteria];
+  const boolean_lookup = booleanValuesLookup[filter.criteria]
   const raw_row_value = filter.criteria.includes("__")
     ? filter.criteria
         .split("__")
         .map((key) => formatFilterCriteria(key))
         .reduce((acc, curr) => acc?.[curr], row)
     : row[formatFilterCriteria(filter.criteria)];
-    
+
   const row_value = formatByFilterType(raw_row_value, filter_type);
-  const filter_value = formatByFilterType(filter.value, filter_type);
+  const filter_value = formatByFilterType(filter.value, filter_type, boolean_lookup);
   const filter_value_min = formatByFilterType(filter.value_min, filter_type);
-  const filter_value_max = formatByFilterType(filter.value_max, filter_type);  
+  const filter_value_max = formatByFilterType(filter.value_max, filter_type);
 
   switch (filter.condition) {
     case "contains":
@@ -377,7 +379,7 @@ function filterRowByCriteria(
     case "range":
       return row_value > filter_value_min && row_value < filter_value_max;
     case "boolean":
-      return row_value;
+      return (filter_value && row_value) || (!filter_value && !row_value);
     case "enum":
       return filter_value.includes(row_value);
     default:
@@ -387,7 +389,7 @@ function filterRowByCriteria(
 
 export function applyFilters(entity, array, filters, filterToColumnMapFn) {
   if (!filters || !array?.length) return array;
-  const entityLookupTable = columnLookupTableByEntity[entity]?.typesLookup;
+  const entityLookupTable = columnLookupTableByEntity[entity];
   return array.filter((row) =>
     filters.every((filter) =>
       filterRowByCriteria(row, filter, entityLookupTable, filterToColumnMapFn),

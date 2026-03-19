@@ -8,9 +8,13 @@ const columnsByEntity = {
       label: "Discount",
       type: "boolean",
       values: [
-        { value: "all", label: "All" },
-        { value: "with-discount", label: "With discount" },
-        { value: "without-discount", label: "No discount" },
+        { value: "all", booleanValue: null, label: "All" },
+        { value: "with-discount", booleanValue: true, label: "With discount" },
+        {
+          value: "without-discount",
+          booleanValue: false,
+          label: "No discount",
+        },
       ],
     },
   ],
@@ -80,6 +84,21 @@ const createColumnNumConstraintsLookupTable = (columns) =>
     }),
     {},
   );
+const createColumnBooleanValuesLookupTable = (columns) =>
+  columns.reduce(
+    (acc, curr) => ({
+      ...acc,
+      [curr.name]:
+        curr.values?.reduce(
+          (acc, curr) => ({
+            ...acc,
+            [curr.value]: curr?.booleanValue ?? null,
+          }),
+          {},
+        ) ?? null,
+    }),
+    {},
+  );
 
 const columnLookupTableByEntity = Object.entries(columnsByEntity).reduce(
   (acc, curr) => ({
@@ -88,10 +107,13 @@ const columnLookupTableByEntity = Object.entries(columnsByEntity).reduce(
       typesLookup: createColumnTypeLookupTable(curr[1]),
       labelsLookup: createColumnLabelsLookupTable(curr[1]),
       valuesLookup: createColumnValuesLookupTable(curr[1]),
+      booleanValuesLookup: createColumnBooleanValuesLookupTable(curr[1]),
       numConstraintsLookup: createColumnNumConstraintsLookupTable(curr[1]),
     },
   }),
   {},
 );
+
+console.log(columnLookupTableByEntity);
 
 export { columnsByEntity, columnLookupTableByEntity };
