@@ -30,6 +30,9 @@ const TableHeader = styled.header`
 `;
 
 export default function CabinTable() {
+  
+  // Cabins are filtered and sorted on the client
+
   const { getURLParamAll, getURLParam } = useURLParams();
 
   const [colName, direction] = decodeParamsToSort(getURLParam("sort_by"), {

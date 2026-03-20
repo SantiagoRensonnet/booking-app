@@ -114,6 +114,4 @@ const columnLookupTableByEntity = Object.entries(columnsByEntity).reduce(
   {},
 );
 
-console.log(columnLookupTableByEntity);
-
 export { columnsByEntity, columnLookupTableByEntity };

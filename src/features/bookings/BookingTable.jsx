@@ -5,30 +5,17 @@ import Spinner from "../../ui/Spinner";
 import Empty from "../../ui/Empty";
 
 import { useBookings } from "./useBookings";
-import { applyFilters, decodeParamsToFilters } from "../../utils/filters";
-import { useURLParams } from "../../hooks/useUrlParams";
-import { decodeParamsToSort, sortByColumn } from "../../utils/sort";
-import { camelCase } from "../../utils/helpers";
 
 function BookingTable() {
-  const { getURLParam, getURLParamAll } = useURLParams();
-
-  const currentFilters = decodeParamsToFilters(getURLParamAll("filter"));
-    const [colName, direction] = decodeParamsToSort(getURLParam("sort_by"), {
-    defaultOrder: "start_date.desc",
-    sortToColumnMapFn: camelCase,
-  });
+  // Bookings are filtered and sorted on the server
 
   const { isLoading, error, bookings } = useBookings({
-    defaultOrder: { column: colName, direction },
+    SortByDefault: "start_date.desc",
   });
 
   if (isLoading) return <Spinner />;
 
-  if (!bookings.length) return <Empty resourceName="bookings" />;  
-
-  const filteredBookings = applyFilters("bookings", bookings, currentFilters, camelCase);
-  const sortedBookings = sortByColumn(filteredBookings, colName, direction);
+  if (!bookings.length) return <Empty resourceName="bookings" />;
 
   return (
     <MenusController>
@@ -43,7 +30,7 @@ function BookingTable() {
         </Table.Header>
 
         <Table.Body
-          data={sortedBookings}
+          data={bookings}
           render={(booking) => (
             <BookingRow key={booking.id} booking={booking} />
           )}

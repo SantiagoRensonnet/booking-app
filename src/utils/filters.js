@@ -254,6 +254,106 @@ export function encodeFiltersToParams(entity, formValues) {
   return params;
 }
 
+export function decodeParamsToQueryInstructions(
+  entity,
+  searchParams,
+  filterNameMapFn = (x) => x,
+) {
+  const { booleanValuesLookup } = columnLookupTableByEntity[entity];
+
+  const filters = [];
+
+  for (const [key, value] of searchParams.entries()) {
+    if (
+      !key.startsWith("filter.") ||
+      (key === "filter.condition" && value === "boolean")
+    )
+      continue;
+
+    const parts = key.split(".");
+    let criteria = parts[1];
+
+    // Convert nested "__" → "." for Supabase
+    const column = filterNameMapFn(criteria.replace(/__/g, "."));
+
+    // Boolean: filter.criteria=true
+    if (parts.length === 2) {
+      const booleanValue = booleanValuesLookup[value];
+      if (booleanValue === null) continue;
+      filters.push({
+        type: "eq",
+        column,
+        value: booleanValue,
+      });
+      continue;
+    }
+
+    const operator = parts[2];
+
+    switch (operator) {
+      case "eq":
+        filters.push({
+          type: "eq",
+          column,
+          value,
+        });
+        break;
+
+      case "contains":
+        filters.push({
+          type: "ilike",
+          column,
+          value: `%${value}%`,
+        });
+        break;
+
+      case "gt":
+        filters.push({
+          type: "gt",
+          column,
+          value: isNaN(value) ? value : Number(value),
+        });
+        break;
+
+      case "lt":
+        filters.push({
+          type: "lt",
+          column,
+          value: isNaN(value) ? value : Number(value),
+        });
+        break;
+
+      case "range": {
+        const [min, max] = value.split("..");
+        filters.push({
+          type: "gte",
+          column,
+          value: isNaN(min) ? min : Number(min),
+        });
+        filters.push({
+          type: "lte",
+          column,
+          value: isNaN(max) ? max : Number(max),
+        });
+        break;
+      }
+
+      case "in":
+        filters.push({
+          type: "in",
+          column,
+          value: value.split(","),
+        });
+        break;
+
+      default:
+        throw new Error("Unknown operator: " + operator);
+    }
+  }
+
+  return filters;
+}
+
 export function decodeParamsToFilters(searchParams) {
   const filters = [];
 
@@ -354,7 +454,7 @@ function filterRowByCriteria(
 ) {
   const { booleanValuesLookup, typesLookup } = entityLookupTable;
   const filter_type = typesLookup[filter.criteria];
-  const boolean_lookup = booleanValuesLookup[filter.criteria]
+  const boolean_lookup = booleanValuesLookup[filter.criteria];
   const raw_row_value = filter.criteria.includes("__")
     ? filter.criteria
         .split("__")
@@ -363,7 +463,11 @@ function filterRowByCriteria(
     : row[formatFilterCriteria(filter.criteria)];
 
   const row_value = formatByFilterType(raw_row_value, filter_type);
-  const filter_value = formatByFilterType(filter.value, filter_type, boolean_lookup);
+  const filter_value = formatByFilterType(
+    filter.value,
+    filter_type,
+    boolean_lookup,
+  );
   const filter_value_min = formatByFilterType(filter.value_min, filter_type);
   const filter_value_max = formatByFilterType(filter.value_max, filter_type);
 

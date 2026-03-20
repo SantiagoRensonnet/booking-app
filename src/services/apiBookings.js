@@ -1,13 +1,19 @@
 import { getToday } from "../utils/helpers";
 import supabase from "./supabase";
 
-export async function getBookings({ column, direction = "asc" }) {
+export async function getBookings({ filters, sortBy }) {
   let query = supabase
     .from("bookings")
     .select(
       "id, startDate,endDate,status,totalPrice, cabins(name), guests(email,fullName)",
     );
-  if (column) query.order(column, { ascending: direction === "asc" });
+  if (sortBy.column)
+    query.order(sortBy.column, { ascending: sortBy.direction === "asc" });
+
+  if (filters.length > 0)
+    filters.forEach((f) => {
+      query = query[f.type](f.column, f.value);
+    });
 
   const { data: bookings, error } = await query;
 
