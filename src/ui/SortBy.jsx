@@ -8,7 +8,9 @@ export default function SortBy({ options }) {
       value={sortBy}
       options={options}
       type="white"
-      onChange={(e) => setURLParam("sort_by", e.target.value)}
+      onChange={(e) => {
+        setURLParam("sort_by", e.target.value, { clearParams: ["page"] });
+      }}
     />
   );
 }

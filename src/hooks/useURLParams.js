@@ -1,8 +1,11 @@
 import { useSearchParams } from "react-router";
-export function useURLParams() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  function setURLParam(name, value) {
+export function useURLParams(defaultInit) {
+  const [searchParams, setSearchParams] = useSearchParams(defaultInit);
+  function setURLParam(name, value, { clearParams } = {}) {
     const newParams = new URLSearchParams(searchParams);
+    if (clearParams) {
+      clearParams.forEach((key) => newParams.delete(key));
+    }
     value ? newParams.set(name, value) : newParams.delete(name);
     setSearchParams(newParams);
   }
@@ -26,18 +29,30 @@ export function useURLParams() {
       searchParams.delete(key);
     }
   }
-  function clearURLParamAll(keyword) {
+  function clearURLParamAll(keyword, { clearParams } = {}) {
     const newParams = new URLSearchParams(searchParams);
     deleteParamsByKeyword(keyword, newParams);
+    if (clearParams) {
+      clearParams.forEach((key) => newParams.delete(key));
+    }
     setSearchParams(newParams);
   }
-  function setURLParamAll(keyword, values) {
+  function setURLParamAll(keyword, values, { clearParams } = {}) {
     const newParams = new URLSearchParams(searchParams);
     deleteParamsByKeyword(keyword, newParams);
+    if (clearParams) {
+      clearParams.forEach((key) => newParams.delete(key));
+    }
     values.forEach((value, key) => {
       if (key.includes(keyword) && value) newParams.set(key, value);
     });
     setSearchParams(newParams);
   }
-  return { getURLParam, setURLParam, getURLParamAll, setURLParamAll,clearURLParamAll };
+  return {
+    getURLParam,
+    setURLParam,
+    getURLParamAll,
+    setURLParamAll,
+    clearURLParamAll,
+  };
 }

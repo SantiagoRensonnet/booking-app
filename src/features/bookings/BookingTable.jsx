@@ -3,13 +3,18 @@ import Table from "../../ui/Table";
 import MenusController from "../../ui/MenusController";
 import Spinner from "../../ui/Spinner";
 import Empty from "../../ui/Empty";
+import Pagination from "../../ui/Pagination";
 
 import { useBookings } from "./useBookings";
 
 function BookingTable() {
   // Bookings are filtered and sorted on the server
-
-  const { isLoading, error, bookings } = useBookings({
+  const {
+    isLoading,
+    error,
+    data: bookings,
+    count,
+  } = useBookings({
     SortByDefault: "start_date.desc",
   });
 
@@ -35,6 +40,9 @@ function BookingTable() {
             <BookingRow key={booking.id} booking={booking} />
           )}
         />
+        <Table.Footer>
+          <Pagination count={count}/>
+        </Table.Footer>
       </Table>
     </MenusController>
   );

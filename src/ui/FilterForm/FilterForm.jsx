@@ -55,7 +55,9 @@ export default function FilterForm({
   );
 
   function onSubmit(data) {
-    setURLParamAll("filter", encodeFiltersToParams(entityName, data));
+    setURLParamAll("filter", encodeFiltersToParams(entityName, data), {
+      clearParams: ["page"],
+    });
     closeModal?.();
   }
   function onError(error) {
@@ -106,7 +108,7 @@ export default function FilterForm({
             $variation="secondary"
             type="button"
             onClick={() => {
-              clearURLParamAll("filter");
+              clearURLParamAll("filter", { clearParams: ["page"] });
               closeModal?.();
             }}
           >
