@@ -3,9 +3,12 @@ import { format, isToday } from "date-fns";
 
 import Tag from "../../ui/Tag";
 import Table from "../../ui/Table";
+import MenusController from "../../ui/MenusController";
 
 import { formatCurrency } from "../../utils/helpers";
 import { formatDistanceFromNow } from "../../utils/helpers";
+import { HiEye } from "react-icons/hi2";
+import { NavLink, useNavigate } from "react-router";
 
 const Cabin = styled.div`
   font-size: 1.6rem;
@@ -34,7 +37,6 @@ const Amount = styled.div`
   font-weight: 500;
 `;
 
-
 function BookingRow({
   booking: {
     id: bookingId,
@@ -54,6 +56,7 @@ function BookingRow({
     "checked-in": "green",
     "checked-out": "silver",
   };
+  const navigate = useNavigate();
 
   return (
     <Table.Row>
@@ -86,6 +89,18 @@ function BookingRow({
       <Tag type={statusToTagName[status]}>{status.replace("-", " ")}</Tag>
 
       <Amount>{formatCurrency(totalPrice)}</Amount>
+      <MenusController.Menu>
+        <MenusController.Toggle id={bookingId} />
+        <MenusController.List id={bookingId}>
+          <MenusController.Button
+            onClick={() => navigate(`/bookings/${bookingId}`)}
+            title="details"
+            icon={<HiEye />}
+          >
+            See details
+          </MenusController.Button>
+        </MenusController.List>
+      </MenusController.Menu>
     </Table.Row>
   );
 }

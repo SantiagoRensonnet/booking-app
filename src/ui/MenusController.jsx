@@ -54,6 +54,8 @@ const StyledButton = styled.button`
   align-items: center;
   gap: 1.6rem;
 
+  text-wrap:nowrap;
+
   &:hover {
     background-color: var(--color-grey-50);
   }

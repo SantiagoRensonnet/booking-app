@@ -29,7 +29,7 @@ export default function AppLayout() {
   return (
     <StyledAppLayout>
       <Header>I'm the header</Header>
-      <Sidebar>Sidebar baby</Sidebar>
+      <Sidebar></Sidebar>
       <Main>
         <Container>
           <Outlet />
