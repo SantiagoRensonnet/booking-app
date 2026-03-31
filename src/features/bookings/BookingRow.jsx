@@ -7,8 +7,10 @@ import MenusController from "../../ui/MenusController";
 
 import { formatCurrency } from "../../utils/helpers";
 import { formatDistanceFromNow } from "../../utils/helpers";
-import { HiEye } from "react-icons/hi2";
+import { HiArrowDownOnSquare, HiArrowUpOnSquare, HiEye } from "react-icons/hi2";
 import { NavLink, useNavigate } from "react-router";
+import useUpdateBooking from "./useUpdateBooking";
+import toast from "react-hot-toast";
 
 const Cabin = styled.div`
   font-size: 1.6rem;
@@ -57,6 +59,9 @@ function BookingRow({
     "checked-out": "silver",
   };
   const navigate = useNavigate();
+  const { isUpdating, updateBooking } = useUpdateBooking({
+    showDefaultSuccessMessage: false,
+  });
 
   return (
     <Table.Row>
@@ -99,6 +104,36 @@ function BookingRow({
           >
             See details
           </MenusController.Button>
+          {status === "unconfirmed" && (
+            <MenusController.Button
+              onClick={() => navigate(`/checkin/${bookingId}`)}
+              title="check-in"
+              icon={<HiArrowDownOnSquare />}
+              disabled={isUpdating}
+            >
+              Check in
+            </MenusController.Button>
+          )}
+          {status === "checked-in" && (
+            <MenusController.Button
+              onClick={() =>
+                updateBooking(
+                  {
+                    id: bookingId,
+                    newBookingData: { status: "checked-out" },
+                  },
+                  {
+                    onSuccess: (data) =>
+                      toast.success(`booking#${data.id} is checked out`),
+                  },
+                )
+              }
+              title="check-out"
+              icon={<HiArrowUpOnSquare />}
+            >
+              Check out
+            </MenusController.Button>
+          )}
         </MenusController.List>
       </MenusController.Menu>
     </Table.Row>

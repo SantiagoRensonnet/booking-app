@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router";
 import styled from "styled-components";
 
 import BookingDataBox from "./BookingDataBox";
@@ -11,6 +12,7 @@ import ButtonText from "../../ui/ButtonText";
 
 import { useMoveBack } from "../../hooks/useMoveBack";
 import useBooking from "./useBooking";
+import useUpdateBooking from "./useUpdateBooking";
 
 const HeadingGroup = styled.div`
   display: flex;
@@ -20,17 +22,19 @@ const HeadingGroup = styled.div`
 
 function BookingDetail() {
   const moveBack = useMoveBack();
+  const navigate = useNavigate();
 
   const { isLoading, data: booking, error } = useBooking();
-  
-  if(isLoading) return <Spinner />
+  const { isLoading: isUpdating, updateBooking } = useUpdateBooking();
 
-    const statusToTagName = {
+  if (isLoading) return <Spinner />;
+
+  const statusToTagName = {
     unconfirmed: "blue",
     "checked-in": "green",
     "checked-out": "silver",
   };
-  
+
   const status = booking.status;
 
   return (
@@ -46,6 +50,29 @@ function BookingDetail() {
       <BookingDataBox booking={booking} />
 
       <ButtonGroup>
+        {booking.status === "unconfirmed" && (
+          <Button onClick={() => navigate(`/checkin/${booking.id}`)}>
+            Check in
+          </Button>
+        )}
+        {booking.status === "checked-in" && (
+          <Button
+            disabled={isUpdating}
+            onClick={() =>
+              updateBooking(
+                {
+                  id: booking.id,
+                  newBookingData: { status: "checked-out" },
+                },
+                {
+                  onSuccess: () => navigate("/"),
+                },
+              )
+            }
+          >
+            Check out
+          </Button>
+        )}
         <Button $variation="secondary" onClick={moveBack}>
           Back
         </Button>

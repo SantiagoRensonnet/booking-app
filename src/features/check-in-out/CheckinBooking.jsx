@@ -1,3 +1,4 @@
+import { useState } from "react";
 import styled from "styled-components";
 import BookingDataBox from "../../features/bookings/BookingDataBox";
 
@@ -8,6 +9,12 @@ import Button from "../../ui/Button";
 import ButtonText from "../../ui/ButtonText";
 
 import { useMoveBack } from "../../hooks/useMoveBack";
+import useBooking from "../bookings/useBooking";
+import Spinner from "../../ui/Spinner";
+import Checkbox from "../../ui/Checkbox";
+import useUpdateBooking from "../bookings/useUpdateBooking";
+import { useNavigate } from "react-router";
+import toast from "react-hot-toast";
 
 const Box = styled.div`
   /* Box */
@@ -18,12 +25,22 @@ const Box = styled.div`
 `;
 
 function CheckinBooking() {
+  const navigate = useNavigate();
   const moveBack = useMoveBack();
 
-  const booking = {};
+  const { isLoading, data: booking, error } = useBooking();
+
+  const [confirm, setConfirm] = useState(false);
+
+  const { isUpdating, updateBooking } = useUpdateBooking({
+    showDefaultSuccessMessage: false,
+  });
+
+  if (isLoading) return <Spinner />;
 
   const {
     id: bookingId,
+    status,
     guests,
     totalPrice,
     numGuests,
@@ -31,19 +48,59 @@ function CheckinBooking() {
     numNights,
   } = booking;
 
-  function handleCheckin() {}
+  function handleCheckin() {
+    updateBooking(
+      {
+        id: bookingId,
+        newBookingData: { status: "checked-in", isPaid: true },
+      },
+      {
+        onSuccess: (data) => {
+          toast.success(`booking#${data.id} is checked out`);
+          navigate("/");
+        },
+      },
+    );
+  }
 
+  if (status === "unconfirmed")
+    return (
+      <>
+        <Row type="horizontal">
+          <Heading as="h1">Check in booking #{bookingId}</Heading>
+          <ButtonText onClick={moveBack}>&larr; Back</ButtonText>
+        </Row>
+
+        <BookingDataBox booking={booking} />
+
+        <Box>
+          <Checkbox onChange={() => setConfirm((confirm) => !confirm)}>
+            I confirm {guests?.fullName} has paid the total amount of $
+            {totalPrice}
+          </Checkbox>
+        </Box>
+
+        <ButtonGroup>
+          <Button disabled={!confirm && !isUpdating} onClick={handleCheckin}>
+            Check in booking #{bookingId}
+          </Button>
+
+          <Button $variation="secondary" onClick={moveBack}>
+            Back
+          </Button>
+        </ButtonGroup>
+      </>
+    );
   return (
     <>
       <Row type="horizontal">
-        <Heading as="h1">Check in booking #{bookingId}</Heading>
+        <Heading as="h1">Booking #{bookingId}</Heading>
         <ButtonText onClick={moveBack}>&larr; Back</ButtonText>
       </Row>
 
       <BookingDataBox booking={booking} />
 
       <ButtonGroup>
-        <Button onClick={handleCheckin}>Check in booking #{bookingId}</Button>
         <Button $variation="secondary" onClick={moveBack}>
           Back
         </Button>

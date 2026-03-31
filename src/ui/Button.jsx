@@ -60,6 +60,10 @@ const Button = styled.button`
   &:hover {
     background: var(--color-green-700);
   }
+  &[disabled]{
+    cursor:not-allowed;
+    opacity:0.5;
+  }
   ${(props) => sizes[props.$size ?? "medium"]}
   ${(props) => variations[props.$variation ?? "primary"]}
   ${(props) =>
