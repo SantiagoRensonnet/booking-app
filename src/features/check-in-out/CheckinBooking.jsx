@@ -33,7 +33,7 @@ function CheckinBooking() {
   const [confirm, setConfirm] = useState(false);
 
   const { isUpdating, updateBooking } = useUpdateBooking({
-    showDefaultSuccessMessage: false,
+    showCustomSuccessMessage: true,
   });
 
   if (isLoading) return <Spinner />;
