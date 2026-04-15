@@ -3,7 +3,6 @@ import styled from "styled-components";
 
 import Header from "../ui/Header";
 import Sidebar from "../ui/Sidebar";
-import Logout from "../pages/Logout";
 
 const Main = styled.main`
   background-color: var(--color-grey-50);
@@ -29,9 +28,7 @@ const Container = styled.div`
 export default function AppLayout() {
   return (
     <StyledAppLayout>
-      <Header>
-        <Logout />
-      </Header>
+      <Header />
       <Sidebar></Sidebar>
       <Main>
         <Container>
