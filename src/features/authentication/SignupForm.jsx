@@ -17,12 +17,12 @@ function SignupForm() {
   } = useForm({ defaultValues: {} });
   const { isLoading, signUp } = useSignUp();
 
-  function onSubmit({ email, password, fullname }) {
+  function onSubmit({ email, password, fullName }) {
     signUp(
       {
         email,
         password,
-        fullname,
+        fullName,
       },
       { onSettled: () => reset() },
     );
@@ -32,8 +32,8 @@ function SignupForm() {
   }
   return (
     <Form onSubmit={handleSubmit(onSubmit, onError)}>
-      <FormRow label="Full name" error={errors?.fullname?.message}>
-        <Input {...register("fullname")} id="fullName" />
+      <FormRow label="Full name" error={errors?.fullName?.message}>
+        <Input {...register("fullName")} id="fullName" />
       </FormRow>
 
       <FormRow label="Email address" error={errors?.email?.message}>

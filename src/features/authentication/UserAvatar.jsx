@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import useAuth from "../authentication/useAuth";
+import useUser from "../authentication/useUser";
 
 const StyledUserAvatar = styled.div`
   display: flex;
@@ -22,9 +22,10 @@ const Avatar = styled.img`
 `;
 
 export default function UserAvatar() {
-  const { user } = useAuth();
-  const { fullName, avatar } = user.user_metadata;
-
+  const { user } = useUser();
+  if (!user) return null;
+  
+  const { fullName, avatar } = user?.user_metadata;
   return (
     <StyledUserAvatar>
       <Avatar src={avatar || "default-user.jpg"} alt="default user" />

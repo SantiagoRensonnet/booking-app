@@ -4,16 +4,16 @@ import Form from "../../ui/Form";
 import FormRow from "../../ui/FormRow";
 import Input from "../../ui/Input";
 
-import { useUpdateUser } from "./useUpdateUser";
+import useChangePassword from "./useChangePassword";
 
-function UpdatePasswordForm() {
+function ChangePasswordForm() {
   const { register, handleSubmit, formState, getValues, reset } = useForm();
   const { errors } = formState;
 
-  const { updateUser, isUpdating } = useUpdateUser();
+  const { changePassword, isUpdating } = useChangePassword();
 
   function onSubmit({ password }) {
-    updateUser({ password }, { onSuccess: reset });
+    changePassword({ password }, { onSuccess: reset });
   }
 
   return (
@@ -57,10 +57,10 @@ function UpdatePasswordForm() {
         <Button onClick={reset} type="reset" $variation="secondary">
           Cancel
         </Button>
-        <Button disabled={isUpdating}>Update password</Button>
+        <Button disabled={isUpdating}>Change password</Button>
       </FormRow>
     </Form>
   );
 }
 
-export default UpdatePasswordForm;
+export default ChangePasswordForm;
