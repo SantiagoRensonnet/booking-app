@@ -3,6 +3,7 @@ import styled from "styled-components";
 
 import Header from "../ui/Header";
 import Sidebar from "../ui/Sidebar";
+import { DarkModeProvider } from "../contexts/DarkModeContext";
 
 const Main = styled.main`
   background-color: var(--color-grey-50);
@@ -27,14 +28,16 @@ const Container = styled.div`
 
 export default function AppLayout() {
   return (
-    <StyledAppLayout>
-      <Header />
-      <Sidebar></Sidebar>
-      <Main>
-        <Container>
-          <Outlet />
-        </Container>
-      </Main>
-    </StyledAppLayout>
+    <DarkModeProvider>
+      <StyledAppLayout>
+        <Header />
+        <Sidebar />
+        <Main>
+          <Container>
+            <Outlet />
+          </Container>
+        </Main>
+      </StyledAppLayout>
+    </DarkModeProvider>
   );
 }
